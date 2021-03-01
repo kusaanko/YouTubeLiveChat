@@ -183,5 +183,12 @@ for (Object obj ; item.getMessageExtended()) {
 Emoji can include more than one shortcut.  
 To get emojis icon url, use ```Emoji#getIconURL()```. Download and use it!
 
+## Reset
+If you have an error, you can reset YouTubeLiveChat instance.
+```Java
+chat.reset();
+```
+After calling this, you don't need call ```YouTubeLiveChat#setLocale()``` again.
+
 # Desclaimer
 I couldn't enough test some features (Paid Stickers, Ticker Paid Message and Member) because of lack of sample data. So there might some bugs. If you found issues, please notice me in GitHub issues!

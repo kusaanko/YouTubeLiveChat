@@ -44,7 +44,7 @@ public class YouTubeLiveChat {
      * @param id            Id used in YouTube
      * @param isTopChatOnly Is this top chat only mode
      * @param type          The type of id (VIDEO or CHANNEL)
-     * @throws IOException Http request error
+     * @throws IOException              Http request error
      * @throws IllegalArgumentException Video id is incorrect
      */
     public YouTubeLiveChat(String id, boolean isTopChatOnly, IdType type) throws IOException {
@@ -76,7 +76,7 @@ public class YouTubeLiveChat {
         this.chatItemTickerPaidMessages.clear();
         this.chatItemDeletes.clear();
         try {
-            this.getInitialData();
+            this.getInitialData(this.videoId, IdType.VIDEO);
         } catch (IOException exception) {
             throw new IOException(exception.getLocalizedMessage());
         }
@@ -482,13 +482,12 @@ public class YouTubeLiveChat {
                 if (channelIdMatcher.find()) {
                     this.channelId = channelIdMatcher.group(1);
                 }
-            }
-            else if (type == IdType.CHANNEL) {
+            } else if (type == IdType.CHANNEL) {
                 this.channelId = id;
                 html = Util.getPageContent("https://www.youtube.com/channel/" + id + "/live", new HashMap<>());
                 Matcher videoIdMatcher = Pattern.compile("\"updatedMetadataEndpoint\":\\{\"videoId\":\"([^\"]*)").matcher(html);
                 if (videoIdMatcher.find()) {
-                	this.videoId = videoIdMatcher.group(1);
+                    this.videoId = videoIdMatcher.group(1);
                 }
             }
             Matcher isReplayMatcher = Pattern.compile("\"isReplay\":([^,]*)").matcher(html);

@@ -60,7 +60,7 @@ public class YouTubeLiveChat {
             throw new IOException(exception.getLocalizedMessage());
         }
         if (this.continuation == null) {
-            throw new IllegalArgumentException("Invalid video id:" + videoId);
+            throw new IllegalArgumentException("Invalid " + type.toString().toLowerCase() + " id:" + id);
         }
     }
 

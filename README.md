@@ -116,7 +116,7 @@ for (ChatItemDelete delete : chat.getChatItemDeletes()) {
     System.out.println(delete.getMessage() + " TargetId:" + delete.getTargetId());
 }
 ```
-If you needed to apply deleting messages from user, you would use this.  
+If you need to apply deleting messages from user, use this.  
 To use this method, you must cache past items id.
 ```Java
 ArrayList<String> cacheId = new ArrayList<>();

@@ -76,15 +76,15 @@ String videoId = YouTubeLiveChat.getVideoIdFromURL("Aw5b1sa0w");
 
 ## Get video id from URL (YouTubeLiveChat 1.2 or later)
 ```Java
-String videoId = YouTubeLiveChat.getChannelIdFromURL("https://www.youtube.com/channel/UCrXUsMBcfTVqwAS7DKg9C0Q");
+String channelId = YouTubeLiveChat.getChannelIdFromURL("https://www.youtube.com/channel/UCrXUsMBcfTVqwAS7DKg9C0Q");
 ```
 Or
 ```Java
-String videoId = YouTubeLiveChat.getChannelIdFromURL("https://www.youtube.com/user/youtube");
+String channelId = YouTubeLiveChat.getChannelIdFromURL("https://www.youtube.com/user/youtube");
 ```
 Or
 ```Java
-String videoId = YouTubeLiveChat.getChannelIdFromURL("https://www.youtube.com/youtube");
+String channelId = YouTubeLiveChat.getChannelIdFromURL("https://www.youtube.com/youtube");
 ```
 
 This method supports these links:
@@ -96,6 +96,11 @@ If you use using a user name, it need user name be registered by the channel's a
 And these can include other parameters. For example
 ```
 https://www.youtube.com/channel/[ChannelId]?key=value
+```
+This method returns channel id if this is passed a channel id.
+```Java
+//This works
+String channelId = YouTubeLiveChat.getChannelIdFromURL("UCrXUsMBcfTVqwAS7DKg9C0Q");
 ```
 
 ## Set locale

@@ -65,6 +65,18 @@ public class YouTubeLiveChat {
     }
 
     /**
+     * Initialize YouTubeLiveChat using video id
+     *
+     * @param videoId       Video id used in YouTube
+     * @param isTopChatOnly Is this top chat only mode
+     * @throws IOException              Http request error
+     * @throws IllegalArgumentException Video id is incorrect
+     */
+    public YouTubeLiveChat(String videoId, boolean isTopChatOnly) throws IOException {
+        this(videoId, isTopChatOnly, IdType.VIDEO);
+    }
+
+    /**
      * Reset this. If you have an error, try to call this.
      * You don't need call setLocale() again.
      *

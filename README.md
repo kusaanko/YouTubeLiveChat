@@ -139,7 +139,7 @@ This is used when new member is registered. It includes message and message exte
 ## Author type
 This shows what kind of certification the author has. For example, VERIFIED and OWNER.
 You can get types of author using ```ChatItem#getAuthorType()```. This method returns AuthorType.  
-Or you can use ```ChatItem#isAuthorVerified()```, ```ChatItem#isAuthorOwner()```, ```ChatItem#isAuthorModerator()``` and ```ChatItem#isMember()``` instead of ```ChatItem#getAuthorType()```.
+Or you can use ```ChatItem#isAuthorVerified()```, ```ChatItem#isAuthorOwner()```, ```ChatItem#isAuthorModerator()``` and ```ChatItem#isAuthorMember()``` instead of ```ChatItem#getAuthorType()```.
 For example of ChatItem#getAuthorType():
 ```Java
 if (chatItem.getAuthorType().contains(AuthorType.OWNER)) {

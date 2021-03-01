@@ -84,6 +84,9 @@ public class YouTubeLiveChat {
         this.chatItemDeletes.clear();
         try {
             //Get live actions
+            if (this.continuation == null) {
+                throw new IOException("continuation is null! Please call reset().");
+            }
             String pageContent = Util.getPageContentWithJson((this.isReplay ? liveChatReplayApi : liveChatApi) + this.apiKey, this.getPayload(offsetInMs), header);
             Map<String, Object> json = Util.toJSON(pageContent);
             if (this.visitorData == null || this.visitorData.isEmpty()) {

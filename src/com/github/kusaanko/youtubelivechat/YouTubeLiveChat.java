@@ -616,4 +616,34 @@ public class YouTubeLiveChat {
         }
         throw new IllegalArgumentException(url);
     }
+
+    /**
+     * Get channel id from url
+     *
+     * @param url Full url(example https://www.youtube.com/channel/USWmbkAWEKOG43WAnbw)
+     * @return Channel id
+     * @throws IllegalArgumentException URL format is incorrect
+     */
+    public static String getChannelIdFromURL(String url) {
+        String id = url;
+        if(id.contains("youtube.com/")) {
+            if(!id.contains("channel/") && (id.startsWith("http://") || id.startsWith("https://"))) {
+                try {
+                    String html = Util.getPageContent(id, new HashMap<>());
+                    Matcher matcher = Pattern.compile("<meta itemprop=\"channelId\" content=\"([^\"]*)\"").matcher(html);
+                    if(matcher.find()) {
+                        return matcher.group(1);
+                    }
+                } catch (IOException ignore) {}
+            }
+            if(id.contains("channel/")) {
+                id = id.substring(id.indexOf("channel/") + 8);
+                if(id.contains("?")) {
+                    id = id.substring(0, id.indexOf("?"));
+                }
+                return id;
+            }
+        }
+        throw new IllegalArgumentException(url);
+    }
 }

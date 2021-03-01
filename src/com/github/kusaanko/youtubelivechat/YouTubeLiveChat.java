@@ -80,7 +80,7 @@ public class YouTubeLiveChat {
      * Initialize YouTubeLiveChat using video id.
      * This works with top chat only mode.
      *
-     * @param videoId       Video id used in YouTube
+     * @param videoId Video id used in YouTube
      * @throws IOException              Http request error
      * @throws IllegalArgumentException Video id is incorrect
      */
@@ -512,6 +512,8 @@ public class YouTubeLiveChat {
                 Matcher videoIdMatcher = Pattern.compile("\"updatedMetadataEndpoint\":\\{\"videoId\":\"([^\"]*)").matcher(html);
                 if (videoIdMatcher.find()) {
                     this.videoId = videoIdMatcher.group(1);
+                } else {
+                    throw new IOException("The channel (ID:" + this.channelId + ") has not started live streaming!");
                 }
             }
             Matcher isReplayMatcher = Pattern.compile("\"isReplay\":([^,]*)").matcher(html);
@@ -641,19 +643,20 @@ public class YouTubeLiveChat {
         if (!id.contains("?") && !id.contains(".com/") && !id.contains(".be/") && !id.contains("/") && !id.contains("&")) {
             return id;
         }
-        if(id.contains("youtube.com/")) {
-            if(!id.contains("channel/") && (id.startsWith("http://") || id.startsWith("https://"))) {
+        if (id.contains("youtube.com/")) {
+            if (!id.contains("channel/") && (id.startsWith("http://") || id.startsWith("https://"))) {
                 try {
                     String html = Util.getPageContent(id, new HashMap<>());
                     Matcher matcher = Pattern.compile("<meta itemprop=\"channelId\" content=\"([^\"]*)\"").matcher(html);
-                    if(matcher.find()) {
+                    if (matcher.find()) {
                         return matcher.group(1);
                     }
-                } catch (IOException ignore) {}
+                } catch (IOException ignore) {
+                }
             }
-            if(id.contains("channel/")) {
+            if (id.contains("channel/")) {
                 id = id.substring(id.indexOf("channel/") + 8);
-                if(id.contains("?")) {
+                if (id.contains("?")) {
                     id = id.substring(0, id.indexOf("?"));
                 }
                 return id;

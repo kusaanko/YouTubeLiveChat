@@ -59,8 +59,26 @@ public class YouTubeLiveChat {
         } catch (IOException exception) {
             throw new IOException(exception.getLocalizedMessage());
         }
-        if(this.continuation == null) {
+        if (this.continuation == null) {
             throw new IllegalArgumentException("Invalid video id:" + videoId);
+        }
+    }
+
+    /**
+     * Reset this. If you have an error, try to call this.
+     * You don't need call setLocale() again.
+     *
+     * @throws IOException Http request error
+     */
+    public void reset() throws IOException {
+        this.visitorData = "";
+        this.chatItems.clear();
+        this.chatItemTickerPaidMessages.clear();
+        this.chatItemDeletes.clear();
+        try {
+            this.getInitialData();
+        } catch (IOException exception) {
+            throw new IOException(exception.getLocalizedMessage());
         }
     }
 
@@ -90,6 +108,9 @@ public class YouTubeLiveChat {
         this.chatItemDeletes.clear();
         try {
             //Get live actions
+            if (this.continuation == null) {
+                throw new IOException("continuation is null! Please call reset().");
+            }
             String pageContent = Util.getPageContentWithJson((this.isReplay ? liveChatReplayApi : liveChatApi) + this.apiKey, this.getPayload(offsetInMs), header);
             Map<String, Object> json = Util.toJSON(pageContent);
             if (this.visitorData == null || this.visitorData.isEmpty()) {
@@ -146,9 +167,11 @@ public class YouTubeLiveChat {
                         for (Object co : continuations) {
                             Map<String, Object> continuation = (Map<String, Object>) co;
                             this.continuation = Util.getJSONValueString(Util.getJSONMap(continuation, "invalidationContinuationData"), "continuation");
-                            String timedContinuationData = Util.getJSONValueString(Util.getJSONMap(continuation, "timedContinuationData"), "continuation");
-                            if (timedContinuationData != null) {
-                                this.continuation = timedContinuationData;
+                            if (this.continuation == null) {
+                                this.continuation = Util.getJSONValueString(Util.getJSONMap(continuation, "timedContinuationData"), "continuation");
+                            }
+                            if (this.continuation == null) {
+                                this.continuation = Util.getJSONValueString(Util.getJSONMap(continuation, "reloadContinuationData"), "continuation");
                             }
                         }
                     }
@@ -303,7 +326,7 @@ public class YouTubeLiveChat {
             chatItem.backgroundColor = Util.getJSONValueInt(liveChatPaidStickerRenderer, "backgroundColor");
             chatItem.purchaseAmount = Util.getJSONValueString(Util.getJSONMap(liveChatPaidStickerRenderer, "purchaseAmountText"), "simpleText");
             List<Object> thumbnails = Util.getJSONList(liveChatPaidStickerRenderer, "thumbnails", "sticker");
-            if(thumbnails != null) {
+            if (thumbnails != null) {
                 chatItem.stickerIconURL = this.getJSONThumbnailURL(thumbnails);
             }
             chatItem.type = ChatItemType.PAID_STICKER;
@@ -540,38 +563,42 @@ public class YouTubeLiveChat {
 
     /**
      * Get video id from url
+     *
      * @param url Full url(example https://www.youtube.com/watch?v=Aw5b1sa0w)
      * @return Video id
      * @throws IllegalArgumentException URL format is incorrect
      */
     public static String getVideoIdFromURL(String url) {
         String id = url;
-        if(id.contains("youtube.com/watch?")) {
-            while(id.contains("v=")) {
+        if (!id.contains("?") && !id.contains(".com/") && !id.contains(".be/") && !id.contains("/") && !id.contains("&")) {
+            return id;
+        }
+        if (id.contains("youtube.com/watch?")) {
+            while (id.contains("v=")) {
                 id = id.substring(id.indexOf("v=") - 1);
-                if(id.startsWith("?") || id.startsWith("&")) {
+                if (id.startsWith("?") || id.startsWith("&")) {
                     id = id.substring(3);
                     if (id.contains("&")) {
                         id = id.substring(0, id.indexOf("&"));
                     }
-                    if(!id.contains("?")) {
+                    if (!id.contains("?")) {
                         return id;
                     }
-                }else {
+                } else {
                     id = id.substring(3);
                 }
             }
         }
-        if(id.contains("youtube.com/embed/")) {
+        if (id.contains("youtube.com/embed/")) {
             id = id.substring(id.indexOf("embed/") + 6);
-            if(id.contains("?")) {
+            if (id.contains("?")) {
                 id = id.substring(0, id.indexOf("?"));
             }
             return id;
         }
-        if(id.contains("youtu.be/")) {
+        if (id.contains("youtu.be/")) {
             id = id.substring(id.indexOf("youtu.be/") + 9);
-            if(id.contains("?")) {
+            if (id.contains("?")) {
                 id = id.substring(0, id.indexOf("?"));
             }
             return id;

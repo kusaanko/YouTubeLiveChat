@@ -47,6 +47,11 @@ And these can include other parameters. For example
 ```
 https://www.youtube.com/watch?v=[VideoId]&t=5s
 ```
+YouTubeLiveChat 1.1 or later, this method returns video id if this is passed a video id.
+```Java
+//This works
+String videoId = YouTubeLiveChat.getVideoIdFromURL("Aw5b1sa0w");
+```
 
 ## Set locale
 ```Java
@@ -139,7 +144,7 @@ This is used when new member is registered. It includes message and message exte
 ## Author type
 This shows what kind of certification the author has. For example, VERIFIED and OWNER.
 You can get types of author using ```ChatItem#getAuthorType()```. This method returns AuthorType.  
-Or you can use ```ChatItem#isAuthorVerified()```, ```ChatItem#isAuthorOwner()```, ```ChatItem#isAuthorModerator()``` and ```ChatItem#isMember()``` instead of ```ChatItem#getAuthorType()```.
+Or you can use ```ChatItem#isAuthorVerified()```, ```ChatItem#isAuthorOwner()```, ```ChatItem#isAuthorModerator()``` and ```ChatItem#isAuthorMember()``` instead of ```ChatItem#getAuthorType()```.
 For example of ChatItem#getAuthorType():
 ```Java
 if (chatItem.getAuthorType().contains(AuthorType.OWNER)) {
@@ -182,6 +187,13 @@ for (Object obj ; item.getMessageExtended()) {
 ```
 Emoji can include more than one shortcut.  
 To get emojis icon url, use ```Emoji#getIconURL()```. Download and use it!
+
+## Reset (YouTubeLiveChat 1.1 or later)
+If you have an error, you can reset YouTubeLiveChat instance.
+```Java
+chat.reset();
+```
+After calling this, you don't need call ```YouTubeLiveChat#setLocale()``` again.
 
 # Desclaimer
 I couldn't enough test some features (Paid Stickers, Ticker Paid Message and Member) because of lack of sample data. So there might some bugs. If you found issues, please notice me in GitHub issues!

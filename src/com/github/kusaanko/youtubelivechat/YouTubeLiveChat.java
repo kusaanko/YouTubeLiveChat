@@ -2,7 +2,13 @@ package com.github.kusaanko.youtubelivechat;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,7 +23,7 @@ public class YouTubeLiveChat {
     private static final String liveChatApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key=";
     private static final String liveChatReplayApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat_replay?key=";
 
-    private final String videoId;
+    private String videoId;
     private String channelId;
     private String continuation;
     private boolean isReplay;
@@ -35,13 +41,13 @@ public class YouTubeLiveChat {
     /**
      * Initialize YouTubeLiveChat
      *
-     * @param videoId       Video id used in YouTube
+     * @param id            Id used in YouTube
      * @param isTopChatOnly Is this top chat only mode
+     * @param type          The type of id (VIDEO or CHANNEL)
      * @throws IOException Http request error
      * @throws IllegalArgumentException Video id is incorrect
      */
-    public YouTubeLiveChat(String videoId, boolean isTopChatOnly) throws IOException {
-        this.videoId = videoId;
+    public YouTubeLiveChat(String id, boolean isTopChatOnly, IdType type) throws IOException {
         this.isTopChatOnly = isTopChatOnly;
         this.visitorData = "";
         this.chatItems = new ArrayList<>();
@@ -49,7 +55,7 @@ public class YouTubeLiveChat {
         this.chatItemDeletes = new ArrayList<>();
         this.locale = Locale.US;
         try {
-            this.getInitialData();
+            this.getInitialData(id, type);
         } catch (IOException exception) {
             throw new IOException(exception.getLocalizedMessage());
         }
@@ -139,7 +145,7 @@ public class YouTubeLiveChat {
                     if (continuations != null) {
                         for (Object co : continuations) {
                             Map<String, Object> continuation = (Map<String, Object>) co;
-                            this.continuation = Util.getJSONValueString(Util.getJSONMap(continuation, "reloadContinuationData"), "continuation");
+                            this.continuation = Util.getJSONValueString(Util.getJSONMap(continuation, "invalidationContinuationData"), "continuation");
                             String timedContinuationData = Util.getJSONValueString(Util.getJSONMap(continuation, "timedContinuationData"), "continuation");
                             if (timedContinuationData != null) {
                                 this.continuation = timedContinuationData;
@@ -442,13 +448,25 @@ public class YouTubeLiveChat {
         return (ArrayList<ChatItem>) this.chatItemTickerPaidMessages.clone();
     }
 
-    private void getInitialData() throws IOException {
+    private void getInitialData(String id, IdType type) throws IOException {
         this.isInitDataAvailable = true;
         {
-            String html = Util.getPageContent("https://www.youtube.com/watch?v=" + this.videoId, new HashMap<>());
-            Matcher channelIdMatcher = Pattern.compile("\"channelId\":\"([^\"]*)\",\"isOwnerViewing\"").matcher(html);
-            if (channelIdMatcher.find()) {
-                this.channelId = channelIdMatcher.group(1);
+            String html = "";
+            if (type == IdType.VIDEO) {
+                this.videoId = id;
+                html = Util.getPageContent("https://www.youtube.com/watch?v=" + id, new HashMap<>());
+                Matcher channelIdMatcher = Pattern.compile("\"channelId\":\"([^\"]*)\",\"isOwnerViewing\"").matcher(html);
+                if (channelIdMatcher.find()) {
+                    this.channelId = channelIdMatcher.group(1);
+                }
+            }
+            else if (type == IdType.CHANNEL) {
+                this.channelId = id;
+                html = Util.getPageContent("https://www.youtube.com/channel/" + id + "/live", new HashMap<>());
+                Matcher videoIdMatcher = Pattern.compile("\"updatedMetadataEndpoint\":\\{\"videoId\":\"([^\"]*)").matcher(html);
+                if (videoIdMatcher.find()) {
+                	this.videoId = videoIdMatcher.group(1);
+                }
             }
             Matcher isReplayMatcher = Pattern.compile("\"isReplay\":([^,]*)").matcher(html);
             if (isReplayMatcher.find()) {
@@ -502,6 +520,7 @@ public class YouTubeLiveChat {
         Map<String, Object> json = new LinkedHashMap<>();
         Map<String, Object> context = new LinkedHashMap<>();
         Map<String, Object> client = new LinkedHashMap<>();
+        Map<String, Object> mainAppWebInfo = new LinkedHashMap<>();
         json.put("context", context);
         context.put("client", client);
         client.put("visitorData", this.visitorData);
@@ -510,12 +529,15 @@ public class YouTubeLiveChat {
         client.put("clientVersion", this.getClientVersion());
         client.put("gl", this.locale.getCountry());
         client.put("hl", this.locale.getLanguage());
+        client.put("mainAppWebInfo", mainAppWebInfo);
+        mainAppWebInfo.put("graftUrl", "https://www.youtube.com/live_chat?continuation=");
         json.put("continuation", this.continuation);
         if (this.isReplay) {
             LinkedHashMap<String, Object> state = new LinkedHashMap<>();
             state.put("playerOffsetMs", String.valueOf(offsetInMs));
             json.put("currentPlayerState", state);
         }
+
         return Util.toJSON(json);
     }
 

@@ -520,7 +520,6 @@ public class YouTubeLiveChat {
         Map<String, Object> json = new LinkedHashMap<>();
         Map<String, Object> context = new LinkedHashMap<>();
         Map<String, Object> client = new LinkedHashMap<>();
-        Map<String, Object> mainAppWebInfo = new LinkedHashMap<>();
         json.put("context", context);
         context.put("client", client);
         client.put("visitorData", this.visitorData);
@@ -529,8 +528,6 @@ public class YouTubeLiveChat {
         client.put("clientVersion", this.getClientVersion());
         client.put("gl", this.locale.getCountry());
         client.put("hl", this.locale.getLanguage());
-        client.put("mainAppWebInfo", mainAppWebInfo);
-        mainAppWebInfo.put("graftUrl", "https://www.youtube.com/live_chat?continuation=");
         json.put("continuation", this.continuation);
         if (this.isReplay) {
             LinkedHashMap<String, Object> state = new LinkedHashMap<>();

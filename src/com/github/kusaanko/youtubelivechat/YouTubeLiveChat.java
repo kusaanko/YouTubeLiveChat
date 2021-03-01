@@ -530,6 +530,9 @@ public class YouTubeLiveChat {
      */
     public static String getVideoIdFromURL(String url) {
         String id = url;
+        if (!id.contains("?") && !id.contains(".com/") && !id.contains(".be/") && !id.contains("/") && !id.contains("&")) {
+            return id;
+        }
         if (id.contains("youtube.com/watch?")) {
             while (id.contains("v=")) {
                 id = id.substring(id.indexOf("v=") - 1);

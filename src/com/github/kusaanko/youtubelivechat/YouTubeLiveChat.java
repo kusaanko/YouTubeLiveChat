@@ -59,6 +59,24 @@ public class YouTubeLiveChat {
     }
 
     /**
+     * Reset this. If you have an error, try to call this.
+     * You don't need call setLocale() again.
+     *
+     * @throws IOException Http request error
+     */
+    public void reset() throws IOException {
+        this.visitorData = "";
+        this.chatItems.clear();
+        this.chatItemTickerPaidMessages.clear();
+        this.chatItemDeletes.clear();
+        try {
+            this.getInitialData();
+        } catch (IOException exception) {
+            throw new IOException(exception.getLocalizedMessage());
+        }
+    }
+
+    /**
      * Update chat data
      *
      * @throws IOException Http request error

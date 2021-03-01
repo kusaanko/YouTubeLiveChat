@@ -638,6 +638,9 @@ public class YouTubeLiveChat {
      */
     public static String getChannelIdFromURL(String url) {
         String id = url;
+        if (!id.contains("?") && !id.contains(".com/") && !id.contains(".be/") && !id.contains("/") && !id.contains("&")) {
+            return id;
+        }
         if(id.contains("youtube.com/")) {
             if(!id.contains("channel/") && (id.startsWith("http://") || id.startsWith("https://"))) {
                 try {

@@ -74,7 +74,7 @@ YouTubeLiveChat 1.1 or later, this method returns video id if this is passed a v
 String videoId = YouTubeLiveChat.getVideoIdFromURL("Aw5b1sa0w");
 ```
 
-## Get video id from URL (YouTubeLiveChat 1.2 or later)
+## Get channel id from URL (YouTubeLiveChat 1.2 or later)
 ```Java
 String channelId = YouTubeLiveChat.getChannelIdFromURL("https://www.youtube.com/channel/UCrXUsMBcfTVqwAS7DKg9C0Q");
 ```

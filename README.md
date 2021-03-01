@@ -47,6 +47,11 @@ And these can include other parameters. For example
 ```
 https://www.youtube.com/watch?v=[VideoId]&t=5s
 ```
+YouTubeLiveChat 1.1 or later, this method returns video id if this is passed a video id.
+```Java
+//This works
+String videoId = YouTubeLiveChat.getVideoIdFromURL("Aw5b1sa0w");
+```
 
 ## Set locale
 ```Java
@@ -183,7 +188,7 @@ for (Object obj ; item.getMessageExtended()) {
 Emoji can include more than one shortcut.  
 To get emojis icon url, use ```Emoji#getIconURL()```. Download and use it!
 
-## Reset
+## Reset (YouTubeLiveChat 1.1 or later)
 If you have an error, you can reset YouTubeLiveChat instance.
 ```Java
 chat.reset();

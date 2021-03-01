@@ -13,7 +13,7 @@
 
 ```Java
 SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-YouTubeLiveChat chat = new YouTubeLiveChat("Aw5b1sa0w", true);
+YouTubeLiveChat chat = new YouTubeLiveChat("Aw5b1sa0w", true, IdType.VIDEO);
 while (true) {
     chat.update();
     for (ChatItem item : chat.getChatItems()) {
@@ -28,6 +28,27 @@ while (true) {
 ```
 If this video is replay, you can get a lot of messages every time ```chat.update()```.  
 Don't worry! There will be no duplicate messages.
+
+## Initialize using video id (YouTubeLiveChat 1.2 or later)
+There are three ways:
+```Java
+//This works with top chat only mode
+YouTubeLiveChat chat = new YouTubeLiveChat("Aw5b1sa0w");
+```
+```Java
+//You can omit third argument
+YouTubeLiveChat chat = new YouTubeLiveChat("Aw5b1sa0w", true);
+```
+```Java
+//This is formal way
+YouTubeLiveChat chat = new YouTubeLiveChat("Aw5b1sa0w", true, IdType.VIDEO);
+```
+
+## Initialize using channel id (YouTubeLiveChat 1.2 or later)
+```Java
+YouTubeLiveChat chat = new YouTubeLiveChat("USWmbkAWEKOG43WAnbw", true, IdType.CHANNEL);
+```
+If the channel have more than one live, YouTube chooses one of them.
 
 ## Get video id from URL
 ```Java
@@ -51,6 +72,30 @@ YouTubeLiveChat 1.1 or later, this method returns video id if this is passed a v
 ```Java
 //This works
 String videoId = YouTubeLiveChat.getVideoIdFromURL("Aw5b1sa0w");
+```
+
+## Get video id from URL (YouTubeLiveChat 1.2 or later)
+```Java
+String videoId = YouTubeLiveChat.getChannelIdFromURL("https://www.youtube.com/channel/UCrXUsMBcfTVqwAS7DKg9C0Q");
+```
+Or
+```Java
+String videoId = YouTubeLiveChat.getChannelIdFromURL("https://www.youtube.com/user/youtube");
+```
+Or
+```Java
+String videoId = YouTubeLiveChat.getChannelIdFromURL("https://www.youtube.com/youtube");
+```
+
+This method supports these links:
+- https://www.youtube.com/channel/[ChannelId]
+- https://www.youtube.com/user/[UserName]
+- https://www.youtube.com/[UserName]
+
+If you use using a user name, it need user name be registered by the channel's author.  
+And these can include other parameters. For example
+```
+https://www.youtube.com/channel/[ChannelId]?key=value
 ```
 
 ## Set locale

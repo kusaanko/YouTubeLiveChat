@@ -244,7 +244,7 @@ public class YouTubeLiveChat {
                     chatItem = new ChatItem();
                     parseChatItem(chatItem, item);
                 }
-                if (chatItem != null) {
+                if (chatItem != null && chatItem.id != null) {
                     this.chatItems.add(chatItem);
                 }
             }

@@ -104,14 +104,14 @@ public class Util {
                 if (strStart) {
                     if (c == '\\') {
                         if (strEscape) {
-                            key.append(c);
+                            str.append(c);
                             strEscape = false;
                         } else {
                             strEscape = true;
                         }
                     } else if (c == '"') {
                         if (strEscape) {
-                            key.append(c);
+                            str.append(c);
                             strEscape = false;
                         } else {
                             result.put(key.toString(), str.toString());

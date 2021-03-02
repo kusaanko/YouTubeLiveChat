@@ -38,9 +38,9 @@ repositories {
 
 dependencies {
     //https://github.com/kusaanko/YouTubeLiveChat
-    implementation 'com.github.kusaanko:maven-test:1.2.2'
+    implementation 'com.github.kusaanko:YouTubeLiveChat:1.2.2'
     //To use latest version
-    //implementation 'com.github.kusaanko:maven-test:latest.release'
+    //implementation 'com.github.kusaanko:YouTubeLiveChat:latest.release'
 }
 ```
 ## Download jars from releases

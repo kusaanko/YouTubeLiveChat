@@ -9,6 +9,46 @@
  - Fetch replay of live chat without YouTube API
  - Supports message, Super Chat, Super Stickers and member
 
+# How to install
+## maven
+```xml
+<repository>
+    <id>kusaanko-maven</id>
+    <url>https://raw.githubusercontent.com/kusaanko/maven/main/</url>
+    <releases>
+        <enabled>true</enabled>
+    </releases>
+</repository>
+```
+```xml
+<dependency>
+  <groupId>com.github.kusaanko</groupId>
+  <artifactId>YouTubeLiveChat</artifactId>
+  <version>1.2.2</version>
+</dependency>
+```
+## Gradle
+```gradle
+repositories {
+    mavenCentral()
+    maven {
+        url "https://raw.githubusercontent.com/kusaanko/maven/main/"
+    }
+}
+
+dependencies {
+    //https://github.com/kusaanko/YouTubeLiveChat
+    implementation 'com.github.kusaanko:maven-test:1.2.2'
+    //To use latest version
+    //implementation 'com.github.kusaanko:maven-test:latest.release'
+}
+```
+## Download jars from releases
+Head over to [releases](https://github.com/kusaanko/YouTubeLiveChat/releases/latest) page.
+
+## Use source code
+Download main and use.
+
 # How to use
 
 ```Java

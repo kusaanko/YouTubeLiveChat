@@ -47,6 +47,8 @@ public class YouTubeLiveChat {
     private String params;
     private String SAPISID, HSID, SSID, APISID, SID;
 
+    private MessageDigest sha1;
+
     /**
      * Initialize YouTubeLiveChat
      *
@@ -239,9 +241,8 @@ public class YouTubeLiveChat {
             if (this.datasyncId == null) {
                 throw new IOException("datasyncId is null! Please call reset() or set user data.");
             }
-            String pageContent = Util.getPageContentWithJson(liveChatSendMessageApi + this.apiKey, getPayloadToSendMessage(0, message), getHeader());
+            Util.sendHttpRequestWithJson(liveChatSendMessageApi + this.apiKey, getPayloadToSendMessage(message), getHeader());
         } catch (IOException exception) {
-            exception.printStackTrace();
             throw new IOException("Can't get youtube live chat!");
         }
     }
@@ -600,7 +601,7 @@ public class YouTubeLiveChat {
             if (innertubeApiKeyMatcher.find()) {
                 this.apiKey = innertubeApiKeyMatcher.group(1);
             }
-            Matcher datasyncIdMatcher = Pattern.compile("\"datasyncId\":\"([^\\|]*)\\|\\|.*\"").matcher(html);
+            Matcher datasyncIdMatcher = Pattern.compile("\"datasyncId\":\"([^|]*)\\|\\|.*\"").matcher(html);
             if (datasyncIdMatcher.find()) {
                 this.datasyncId = datasyncIdMatcher.group(1);
             }
@@ -664,10 +665,7 @@ public class YouTubeLiveChat {
         return Util.toJSON(json);
     }
 
-    private String getPayloadToSendMessage(long offsetInMs, String message) {
-        if (offsetInMs < 0) {
-            offsetInMs = 0;
-        }
+    private String getPayloadToSendMessage(String message) {
         Map<String, Object> json = new LinkedHashMap<>();
         Map<String, Object> context = new LinkedHashMap<>();
         Map<String, Object> user = new LinkedHashMap<>();
@@ -692,24 +690,29 @@ public class YouTubeLiveChat {
     private Map<String, String> getHeader() {
         HashMap<String, String> header = new HashMap<>();
         if (!(SAPISID != null && HSID != null && SSID != null && APISID != null && SID != null)) return header;
-        String time = new Date().getTime() / 1000 + "";
+        String time = System.currentTimeMillis() / 1000 + "";
         String origin = "https://www.youtube.com";
         String hash = time + " " + SAPISID + " " + origin;
-        MessageDigest sha1 = null;
-        try {
-            sha1 = MessageDigest.getInstance("SHA-1");
-        }
-        catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        byte[] sha1_result = sha1.digest(hash.getBytes());
+        byte[] sha1_result = this.getSHA1Engine().digest(hash.getBytes());
 
-        header.put("authorization", "SAPISIDHASH " + time + "_" + String.format("%040x", new BigInteger(1, sha1_result)));
-        header.put("x-origin", origin);
-        header.put("origin", origin);
-        header.put("cookie", String.format("SAPISID=%s; HSID=%s; SSID=%s; APISID=%s; SID=%s;", SAPISID, HSID, SSID, APISID, SID));
+        header.put("Authorization", "SAPISIDHASH " + time + "_" + String.format("%040x", new BigInteger(1, sha1_result)));
+        header.put("X-Origin", origin);
+        header.put("Origin", origin);
+        header.put("Cookie", String.format("SAPISID=%s; HSID=%s; SSID=%s; APISID=%s; SID=%s;", SAPISID, HSID, SSID, APISID, SID));
 
         return header;
+    }
+
+    private MessageDigest getSHA1Engine() {
+        if(this.sha1 == null) {
+            try {
+                this.sha1 = MessageDigest.getInstance("SHA-1");
+            }
+            catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+        }
+        return this.sha1;
     }
 
     /**

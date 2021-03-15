@@ -268,7 +268,7 @@ public class YouTubeLiveChat {
 
     /**
      * Set user data
-     * The IDs are written in the Cookie
+     * The IDs are written in your browser's Cookie
      *
      * @param SAPISID SAPIID
      * @param HSID HSID

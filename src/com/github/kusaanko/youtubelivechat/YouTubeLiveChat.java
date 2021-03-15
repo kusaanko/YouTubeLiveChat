@@ -5,13 +5,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -230,7 +224,7 @@ public class YouTubeLiveChat {
      * @throws IllegalStateException The IDs are not set error
      */
     public void sendMessage(String message) throws IOException, IllegalStateException {
-        if(this.isReplay) {
+        if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can send a message if this live isn't replay.");
         }
         if (this.SAPISID == null || this.HSID == null || this.SSID == null || this.APISID == null || this.SID == null) {
@@ -240,6 +234,9 @@ public class YouTubeLiveChat {
         try {
             if (this.datasyncId == null) {
                 throw new IOException("datasyncId is null! Please call reset() or set user data.");
+            }
+            if (this.params == null) {
+                throw new IllegalStateException("params is null! Please call reset().");
             }
             Util.sendHttpRequestWithJson(liveChatSendMessageApi + this.apiKey, this.getPayloadToSendMessage(message), this.getHeader());
         } catch (IOException exception) {
@@ -671,7 +668,10 @@ public class YouTubeLiveChat {
         Map<String, Object> richMessage = new LinkedHashMap<>();
         Map<String, Object> textSegments = new LinkedHashMap<>();
         Map<String, Object> client = new LinkedHashMap<>();
-        json.put("clientMessageId", clientMessageId + commentCounter++);
+        if (this.commentCounter >= Integer.MAX_VALUE - 1) {
+            this.commentCounter = 0;
+        }
+        json.put("clientMessageId", this.clientMessageId + this.commentCounter++);
         json.put("context", context);
         context.put("client", client);
         client.put("clientName", "WEB");
@@ -688,7 +688,8 @@ public class YouTubeLiveChat {
 
     private Map<String, String> getHeader() {
         HashMap<String, String> header = new HashMap<>();
-        if (this.SAPISID == null || this.HSID == null || this.SSID == null || this.APISID == null || this.SID == null) return header;
+        if (this.SAPISID == null || this.HSID == null || this.SSID == null || this.APISID == null || this.SID == null)
+            return header;
         String time = System.currentTimeMillis() / 1000 + "";
         String origin = "https://www.youtube.com";
         String hash = time + " " + this.SAPISID + " " + origin;

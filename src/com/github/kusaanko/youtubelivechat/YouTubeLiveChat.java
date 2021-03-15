@@ -234,17 +234,13 @@ public class YouTubeLiveChat {
             throw new IllegalStateException("You need to set user data using setUserData()");
         }
 
-        if (this.isInitDataAvailable) {
-            this.isInitDataAvailable = false;
-            return;
-        }
         try {
             if (this.datasyncId == null) {
                 throw new IOException("datasyncId is null! Please call reset() or set user data.");
             }
             Util.sendHttpRequestWithJson(liveChatSendMessageApi + this.apiKey, getPayloadToSendMessage(message), getHeader());
         } catch (IOException exception) {
-            throw new IOException("Can't get youtube live chat!");
+            throw new IOException("Couldn't send a message!");
         }
     }
 
@@ -628,7 +624,6 @@ public class YouTubeLiveChat {
                 if (sendLiveChatMessageEndpoint != null) {
                     this.params = sendLiveChatMessageEndpoint.get("params").toString();
                 }
-                this.isInitDataAvailable = false;
             }
         }
     }

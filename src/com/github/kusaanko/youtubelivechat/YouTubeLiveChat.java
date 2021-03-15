@@ -226,7 +226,7 @@ public class YouTubeLiveChat {
      * You need to set user data using setUserData() before calling this method
      *
      * @param message Chat message to send
-     * @throws IOException Http request error
+     * @throws IOException           Http request error
      * @throws IllegalStateException The IDs are not set error
      */
     public void sendMessage(String message) throws IOException, IllegalStateException {
@@ -267,10 +267,10 @@ public class YouTubeLiveChat {
      * The IDs are written in your browser's Cookie
      *
      * @param SAPISID SAPIID
-     * @param HSID HSID
-     * @param SSID SSID
-     * @param APISID APISID
-     * @param SID SID
+     * @param HSID    HSID
+     * @param SSID    SSID
+     * @param APISID  APISID
+     * @param SID     SID
      */
     public void setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID) {
         this.SAPISID = SAPISID;
@@ -281,8 +281,7 @@ public class YouTubeLiveChat {
 
         try {
             reset();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -700,11 +699,10 @@ public class YouTubeLiveChat {
     }
 
     private MessageDigest getSHA1Engine() {
-        if(this.sha1 == null) {
+        if (this.sha1 == null) {
             try {
                 this.sha1 = MessageDigest.getInstance("SHA-1");
-            }
-            catch (NoSuchAlgorithmException e) {
+            } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
         }

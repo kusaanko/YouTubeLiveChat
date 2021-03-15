@@ -404,6 +404,23 @@ public class Util {
         return content;
     }
 
+    public static void sendHttpRequestWithJson(String url, String data, Map<String, String> header) throws IOException {
+        URL u = new URL(url);
+        HttpURLConnection connection = (HttpURLConnection) u.openConnection();
+        header.put("Content-Type", "application/json");
+        header.put("Content-Length", String.valueOf(data.length()));
+        for (String key : header.keySet()) {
+            connection.setRequestProperty(key, header.get(key));
+        }
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
+        writer.write(data);
+        writer.close();
+        connection.connect();
+        connection.disconnect();
+    }
+
     public static String generateClientMessageId() {
         String base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-";
         StringBuilder sb = new StringBuilder();

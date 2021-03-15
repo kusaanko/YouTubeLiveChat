@@ -101,7 +101,7 @@ public class YouTubeLiveChat {
 
     /**
      * Reset this. If you have an error, try to call this.
-     * You don't need call setLocale() again.
+     * You don't need to call setLocale() again.
      *
      * @throws IOException Http request error
      */
@@ -221,15 +221,14 @@ public class YouTubeLiveChat {
 
     /**
      * Send chat message
-     * You need yo set user data with setUserData() before call this method
+     * You need to set user data using setUserData() before calling this method
      *
-     * @param offsetInMs Offset in milli seconds
      * @param message Chat message to send
      * @throws IOException Http request error
      * @throws IllegalStateException The IDs are not set error
      */
     public void sendMessage(String message) throws IOException, IllegalStateException {
-        if (!(SAPISID != null && HSID != null && SSID != null && APISID != null && SID != null)) throw new IllegalStateException("You need to set user data with setUserData()");
+        if (!(SAPISID != null && HSID != null && SSID != null && APISID != null && SID != null)) throw new IllegalStateException("You need to set user data using setUserData()");
 
         if (this.isInitDataAvailable) {
             this.isInitDataAvailable = false;
@@ -267,7 +266,7 @@ public class YouTubeLiveChat {
 
     /**
      * Set user data
-     * The IDs are written in Cookies
+     * The IDs are written in the Cookie
      *
      * @param SAPISID SAPIID
      * @param HSID HSID

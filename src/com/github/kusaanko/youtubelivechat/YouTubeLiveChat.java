@@ -685,7 +685,7 @@ public class YouTubeLiveChat {
 
     private Map<String, String> getHeader() {
         HashMap<String, String> header = new HashMap<>();
-        if (!(SAPISID != null && HSID != null && SSID != null && APISID != null && SID != null)) return header;
+        if (SAPISID == null || HSID == null || SSID == null || APISID == null || SID == null) return header;
         String time = System.currentTimeMillis() / 1000 + "";
         String origin = "https://www.youtube.com";
         String hash = time + " " + SAPISID + " " + origin;

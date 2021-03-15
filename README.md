@@ -278,6 +278,17 @@ for (Object obj ; item.getMessageExtended()) {
 Emoji can include more than one shortcut.  
 To get emojis icon url, use ```Emoji#getIconURL()```. Download and use it!
 
+## Send chat message (YouTubeLiveChat 1.X or later)
+You can send message to the live. This function needs some user data, SAPISID, HSID, SSID, APISID, and SID. The IDs are written in cookies.  
+First, you need set user data with setUserData().
+```Java
+chat.setUserData("SAPISID", "HSID", "SSID", "APISID", "SID");
+```
+Next, you can send message with sendMessage().
+```Java
+chat.sendMessage("Message that you want to send");
+```
+
 ## Reset (YouTubeLiveChat 1.1 or later)
 If you have an error, you can reset YouTubeLiveChat instance.
 ```Java

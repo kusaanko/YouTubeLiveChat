@@ -239,7 +239,6 @@ public class YouTubeLiveChat {
             return;
         }
         try {
-            //Get live actions
             if (this.datasyncId == null) {
                 throw new IOException("datasyncId is null! Please call reset() or set user data.");
             }

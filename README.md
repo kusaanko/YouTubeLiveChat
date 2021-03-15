@@ -24,7 +24,7 @@
 <dependency>
   <groupId>com.github.kusaanko</groupId>
   <artifactId>YouTubeLiveChat</artifactId>
-  <version>1.2.2</version>
+  <version>1.3</version>
 </dependency>
 ```
 ## Gradle
@@ -38,7 +38,7 @@ repositories {
 
 dependencies {
     //https://github.com/kusaanko/YouTubeLiveChat
-    implementation 'com.github.kusaanko:YouTubeLiveChat:1.2.2'
+    implementation 'com.github.kusaanko:YouTubeLiveChat:1.3'
     //To use latest version
     //implementation 'com.github.kusaanko:YouTubeLiveChat:latest.release'
 }
@@ -278,13 +278,13 @@ for (Object obj ; item.getMessageExtended()) {
 Emoji can include more than one shortcut.  
 To get emojis icon url, use ```Emoji#getIconURL()```. Download and use it!
 
-## Send chat message (YouTubeLiveChat 1.X or later)
-You can send message to the live. This function needs some user data, SAPISID, HSID, SSID, APISID, and SID. The IDs are written in cookies.  
-First, you need set user data with setUserData().
+## Send to the live chat a message (YouTubeLiveChat 1.3 or later)
+You can send a message to the live chat. This function needs some user data: SAPISID, HSID, SSID, APISID, and SID. The IDs are written in your browser's Cookie.  
+First, you need set user data using ```YouTubeLiveChat#setUserData().```
 ```Java
 chat.setUserData("SAPISID", "HSID", "SSID", "APISID", "SID");
 ```
-Next, you can send message with sendMessage().
+Next, you can send message using ```YouTubeLiveChat#sendMessage()```.
 ```Java
 chat.sendMessage("Message that you want to send");
 ```

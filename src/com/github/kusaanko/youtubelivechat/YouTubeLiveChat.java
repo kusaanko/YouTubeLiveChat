@@ -216,7 +216,7 @@ public class YouTubeLiveChat {
 
 
     /**
-     * Send chat message
+     * Send a message to this live chat
      * You need to set user data using setUserData() before calling this method
      *
      * @param message Chat message to send

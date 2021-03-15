@@ -623,6 +623,7 @@ public class YouTubeLiveChat {
                 if (sendLiveChatMessageEndpoint != null) {
                     this.params = sendLiveChatMessageEndpoint.get("params").toString();
                 }
+                this.isInitDataAvailable = false;
             }
         }
     }

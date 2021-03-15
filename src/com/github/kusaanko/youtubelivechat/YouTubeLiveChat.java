@@ -1,6 +1,9 @@
 package com.github.kusaanko.youtubelivechat;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,6 +25,7 @@ public class YouTubeLiveChat {
 
     private static final String liveChatApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key=";
     private static final String liveChatReplayApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat_replay?key=";
+    private static final String liveChatSendMessageApi = "https://www.youtube.com/youtubei/v1/live_chat/send_message?key=";
 
     private String videoId;
     private String channelId;
@@ -37,6 +41,11 @@ public class YouTubeLiveChat {
     private String clientVersion;
     private boolean isInitDataAvailable;
     private String apiKey;
+    private String datasyncId;
+    private int commentCounter;
+    private String clientMessageId;
+    private String params;
+    private String SAPISID, HSID, SSID, APISID, SID;
 
     /**
      * Initialize YouTubeLiveChat
@@ -54,6 +63,8 @@ public class YouTubeLiveChat {
         this.chatItemTickerPaidMessages = new ArrayList<>();
         this.chatItemDeletes = new ArrayList<>();
         this.locale = Locale.US;
+        this.commentCounter = 0;
+        this.clientMessageId = Util.generateClientMessageId();
         try {
             this.getInitialData(id, type);
         } catch (IOException exception) {
@@ -99,6 +110,8 @@ public class YouTubeLiveChat {
         this.chatItems.clear();
         this.chatItemTickerPaidMessages.clear();
         this.chatItemDeletes.clear();
+        this.commentCounter = 0;
+        this.clientMessageId = Util.generateClientMessageId();
         try {
             this.getInitialData(this.videoId, IdType.VIDEO);
         } catch (IOException exception) {
@@ -122,7 +135,6 @@ public class YouTubeLiveChat {
      * @throws IOException Http request error
      */
     public void update(long offsetInMs) throws IOException {
-        HashMap<String, String> header = new HashMap<>();
         if (this.isInitDataAvailable) {
             this.isInitDataAvailable = false;
             return;
@@ -135,7 +147,7 @@ public class YouTubeLiveChat {
             if (this.continuation == null) {
                 throw new IOException("continuation is null! Please call reset().");
             }
-            String pageContent = Util.getPageContentWithJson((this.isReplay ? liveChatReplayApi : liveChatApi) + this.apiKey, this.getPayload(offsetInMs), header);
+            String pageContent = Util.getPageContentWithJson((this.isReplay ? liveChatReplayApi : liveChatApi) + this.apiKey, getPayload(offsetInMs), getHeader());
             Map<String, Object> json = Util.toJSON(pageContent);
             if (this.visitorData == null || this.visitorData.isEmpty()) {
                 this.visitorData = Util.getJSONValueString(Util.getJSONMap(json, "responseContext"), "visitorData");
@@ -206,6 +218,36 @@ public class YouTubeLiveChat {
         }
     }
 
+
+    /**
+     * Send chat message
+     * You need yo set user data with setUserData() before call this method
+     *
+     * @param offsetInMs Offset in milli seconds
+     * @param message Chat message to send
+     * @throws IOException Http request error
+     * @throws IllegalStateException The IDs are not set error
+     */
+    public void sendMessage(String message) throws IOException, IllegalStateException {
+        if (!(SAPISID != null && HSID != null && SSID != null && APISID != null && SID != null)) throw new IllegalStateException("You need to set user data with setUserData()");
+
+        if (this.isInitDataAvailable) {
+            this.isInitDataAvailable = false;
+            return;
+        }
+        try {
+            //Get live actions
+            if (this.datasyncId == null) {
+                throw new IOException("datasyncId is null! Please call reset() or set user data.");
+            }
+            String pageContent = Util.getPageContentWithJson(liveChatSendMessageApi + this.apiKey, getPayloadToSendMessage(0, message), getHeader());
+        } catch (IOException exception) {
+            exception.printStackTrace();
+            throw new IOException("Can't get youtube live chat!");
+        }
+    }
+
+
     /**
      * Language used to get chat
      * Default locale is Locale.US(en_US)
@@ -221,6 +263,31 @@ public class YouTubeLiveChat {
             throw new IllegalArgumentException("Locale must be set language!");
         }
         this.locale = locale;
+    }
+
+    /**
+     * Set user data
+     * The IDs are written in Cookies
+     *
+     * @param SAPISID SAPIID
+     * @param HSID HSID
+     * @param SSID SSID
+     * @param APISID APISID
+     * @param SID SID
+     */
+    public void setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID) {
+        this.SAPISID = SAPISID;
+        this.HSID = HSID;
+        this.SSID = SSID;
+        this.APISID = APISID;
+        this.SID = SID;
+
+        try {
+            reset();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void parseActions(List<Object> json) {
@@ -501,14 +568,14 @@ public class YouTubeLiveChat {
             String html = "";
             if (type == IdType.VIDEO) {
                 this.videoId = id;
-                html = Util.getPageContent("https://www.youtube.com/watch?v=" + id, new HashMap<>());
+                html = Util.getPageContent("https://www.youtube.com/watch?v=" + id, getHeader());
                 Matcher channelIdMatcher = Pattern.compile("\"channelId\":\"([^\"]*)\",\"isOwnerViewing\"").matcher(html);
                 if (channelIdMatcher.find()) {
                     this.channelId = channelIdMatcher.group(1);
                 }
             } else if (type == IdType.CHANNEL) {
                 this.channelId = id;
-                html = Util.getPageContent("https://www.youtube.com/channel/" + id + "/live", new HashMap<>());
+                html = Util.getPageContent("https://www.youtube.com/channel/" + id + "/live", getHeader());
                 Matcher videoIdMatcher = Pattern.compile("\"updatedMetadataEndpoint\":\\{\"videoId\":\"([^\"]*)").matcher(html);
                 if (videoIdMatcher.find()) {
                     this.videoId = videoIdMatcher.group(1);
@@ -534,6 +601,10 @@ public class YouTubeLiveChat {
             if (innertubeApiKeyMatcher.find()) {
                 this.apiKey = innertubeApiKeyMatcher.group(1);
             }
+            Matcher datasyncIdMatcher = Pattern.compile("\"datasyncId\":\"([^\\|]*)\\|\\|.*\"").matcher(html);
+            if (datasyncIdMatcher.find()) {
+                this.datasyncId = datasyncIdMatcher.group(1);
+            }
             if (this.isReplay) {
                 html = Util.getPageContent("https://www.youtube.com/live_chat_replay?continuation=" + this.continuation + "", new HashMap<>());
                 String initJson = html.substring(html.indexOf("window[\"ytInitialData\"] = ") + "window[\"ytInitialData\"] = ".length());
@@ -548,6 +619,14 @@ public class YouTubeLiveChat {
                     parseActions(actions);
                 }
             } else {
+                html = Util.getPageContent("https://www.youtube.com/live_chat?continuation=" + this.continuation + "", getHeader());
+                String initJson = html.substring(html.indexOf("window[\"ytInitialData\"] = ") + "window[\"ytInitialData\"] = ".length());
+                initJson = initJson.substring(0, initJson.indexOf(";</script>"));
+                Map<String, Object> json = Util.toJSON(initJson);
+                Map<String, Object> sendLiveChatMessageEndpoint = Util.getJSONMap(json, "continuationContents", "liveChatContinuation", "actionPanel", "liveChatMessageInputRenderer", "sendButton", "buttonRenderer", "serviceEndpoint", "sendLiveChatMessageEndpoint");
+                if (sendLiveChatMessageEndpoint != null) {
+                    this.params = sendLiveChatMessageEndpoint.get("params").toString();
+                }
                 this.isInitDataAvailable = false;
             }
         }
@@ -584,6 +663,54 @@ public class YouTubeLiveChat {
         }
 
         return Util.toJSON(json);
+    }
+
+    private String getPayloadToSendMessage(long offsetInMs, String message) {
+        if (offsetInMs < 0) {
+            offsetInMs = 0;
+        }
+        Map<String, Object> json = new LinkedHashMap<>();
+        Map<String, Object> context = new LinkedHashMap<>();
+        Map<String, Object> user = new LinkedHashMap<>();
+        Map<String, Object> richMessage = new LinkedHashMap<>();
+        Map<String, Object> textSegments = new LinkedHashMap<>();
+        Map<String, Object> client = new LinkedHashMap<>();
+        json.put("clientMessageId", clientMessageId + commentCounter++);
+        json.put("context", context);
+        context.put("client", client);
+        client.put("clientName", "WEB");
+        client.put("clientVersion", this.getClientVersion());
+        context.put("user", user);
+        user.put("onBehalfOfUser", datasyncId);
+        json.put("params", this.params);
+        json.put("richMessage", richMessage);
+        richMessage.put("textSegments", textSegments);
+        textSegments.put("text", message);
+
+        return Util.toJSON(json);
+    }
+
+    private Map<String, String> getHeader() {
+        HashMap<String, String> header = new HashMap<>();
+        if (!(SAPISID != null && HSID != null && SSID != null && APISID != null && SID != null)) return header;
+        String time = new Date().getTime() / 1000 + "";
+        String origin = "https://www.youtube.com";
+        String hash = time + " " + SAPISID + " " + origin;
+        MessageDigest sha1 = null;
+        try {
+            sha1 = MessageDigest.getInstance("SHA-1");
+        }
+        catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        byte[] sha1_result = sha1.digest(hash.getBytes());
+
+        header.put("authorization", "SAPISIDHASH " + time + "_" + String.format("%040x", new BigInteger(1, sha1_result)));
+        header.put("x-origin", origin);
+        header.put("origin", origin);
+        header.put("cookie", String.format("SAPISID=%s; HSID=%s; SSID=%s; APISID=%s; SID=%s;", SAPISID, HSID, SSID, APISID, SID));
+
+        return header;
     }
 
     /**

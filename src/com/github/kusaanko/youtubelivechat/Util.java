@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 @SuppressWarnings("unchecked")
 public class Util {
@@ -401,5 +402,17 @@ public class Util {
         String content = baos.toString(StandardCharsets.UTF_8.toString());
         baos.close();
         return content;
+    }
+
+    public static String generateClientMessageId() {
+        String base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-";
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+
+        for (int i = 0; i < 26; i++) {
+            sb.append(base.charAt(random.nextInt(base.length())));
+        }
+
+        return sb.toString();
     }
 }

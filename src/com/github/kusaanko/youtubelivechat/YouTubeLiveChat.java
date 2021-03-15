@@ -230,6 +230,9 @@ public class YouTubeLiveChat {
      * @throws IllegalStateException The IDs are not set error
      */
     public void sendMessage(String message) throws IOException, IllegalStateException {
+        if(this.isReplay) {
+            throw new IllegalStateException("This live is replay! You can send a message if this live isn't replay.");
+        }
         if (this.SAPISID == null || this.HSID == null || this.SSID == null || this.APISID == null || this.SID == null) {
             throw new IllegalStateException("You need to set user data using setUserData()");
         }

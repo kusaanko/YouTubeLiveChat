@@ -8,7 +8,7 @@
  - Fetch live chat without YouTube API
  - Fetch replay of live chat without YouTube API
  - Supports message, Super Chat, Super Stickers and member
- - Send a message to live chat
+ - Send a message to live chat (Developed by @yadokari1130 )
 
 # How to install
 ## maven

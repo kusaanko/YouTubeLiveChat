@@ -264,7 +264,7 @@ Messages may include emojis. But you can't get emojis using ```ChatItem#getMessa
 How to get emojis:
 ```Java
 String message = "";
-for (Object obj ; item.getMessageExtended()) {
+for (Object obj : item.getMessageExtended()) {
     if (obj instanceof Text) {
         Text text = (Text) obj;
         message += text.getText();

@@ -227,7 +227,7 @@ public class YouTubeLiveChat {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can send a message if this live isn't replay.");
         }
-        if (this.SAPISID == null || this.HSID == null || this.SSID == null || this.APISID == null || this.SID == null) {
+        if (!this.hasAllIDs()) {
             throw new IllegalStateException("You need to set user data using setUserData()");
         }
 
@@ -688,8 +688,7 @@ public class YouTubeLiveChat {
 
     private Map<String, String> getHeader() {
         HashMap<String, String> header = new HashMap<>();
-        if (this.SAPISID == null || this.HSID == null || this.SSID == null || this.APISID == null || this.SID == null)
-            return header;
+        if (!this.hasAllIDs()) return header;
         String time = System.currentTimeMillis() / 1000 + "";
         String origin = "https://www.youtube.com";
         String hash = time + " " + this.SAPISID + " " + origin;
@@ -791,5 +790,9 @@ public class YouTubeLiveChat {
             }
         }
         throw new IllegalArgumentException(url);
+    }
+
+    private boolean hasAllIDs() {
+        return this.SAPISID != null && this.HSID != null && this.SSID != null && this.APISID != null && this.SID != null;
     }
 }

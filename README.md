@@ -97,13 +97,13 @@ String videoId = YouTubeLiveChat.getVideoIdFromURL("https://www.youtube.com/watc
 ```
 
 This method supports these links:
-- www.youtube.com/watch?v=[VideoId]
-- youtube.com/watch?v=[VideoId]
-- www.youtube.com/watch?v=[VideoId]
-- youtube.com/watch?v=[VideoId]
-- youtu.be/[VideoId]
-- www.youtube.com/embed/[VideoId]
-- youtube.com/embed/[VideoId]
+- https://www.youtube.com/watch?v=[VideoId]
+- https://youtube.com/watch?v=[VideoId]
+- https://www.youtube.com/watch?v=[VideoId]
+- https://youtube.com/watch?v=[VideoId]
+- https://youtu.be/[VideoId]
+- https://www.youtube.com/embed/[VideoId]
+- https://youtube.com/embed/[VideoId]
 
 And these can include other parameters. For example
 ```

@@ -5,7 +5,13 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -260,6 +266,19 @@ public class YouTubeLiveChat {
             throw new IllegalArgumentException("Locale must be set language!");
         }
         this.locale = locale;
+    }
+
+    /**
+     * Set user data
+     * The IDs are written in your browser's Cookie
+     *
+     * @param ids The Map that contains these keys: SAPISID, HSID, SSID, APISID and SID
+     */
+    public void setUserData(Map<String, String> ids) {
+        if (!ids.containsKey("SAPISID") || !ids.containsKey("HSID") || !ids.containsKey("SSID") || !ids.containsKey("APISID") || !ids.containsKey("SID"))
+            throw new IllegalArgumentException("The map didn't contain any ids.");
+
+        this.setUserData(ids.get("SAPISID"), ids.get("HSID"), ids.get("SSID"), ids.get("APISID"), ids.get("SID"));
     }
 
     /**

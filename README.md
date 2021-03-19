@@ -281,14 +281,21 @@ To get emojis icon url, use ```Emoji#getIconURL()```. Download and use it!
 
 ## Send a message to the live chat (YouTubeLiveChat 1.3 or later)
 You can send a message to the live chat. This function needs some user data: SAPISID, HSID, SSID, APISID, and SID. The IDs are written in your browser's Cookie.  
-First, you need to set user data using ```YouTubeLiveChat#setUserData().```
+First, you need to set user data using ```YouTubeLiveChat#setUserData()```.
 ```Java
 chat.setUserData("SAPISID", "HSID", "SSID", "APISID", "SID");
+```
+You can use Map YouTubeLiveChat 1.3.2 or later.
+```Java
+chat.setUserData(Map<String String>);
 ```
 Next, you can send a message using ```YouTubeLiveChat#sendMessage()```.
 ```Java
 chat.sendMessage("Message that you want to send");
 ```
+**To Chrome user**
+You can't use the IDs that written in Chrome's cookie.
+I'm sorry, but please use another browser's cookie.
 
 ## Reset (YouTubeLiveChat 1.1 or later)
 If you have an error, you can reset YouTubeLiveChat instance.

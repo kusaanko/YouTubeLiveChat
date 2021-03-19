@@ -287,7 +287,7 @@ chat.setUserData("SAPISID", "HSID", "SSID", "APISID", "SID");
 ```
 You can use Map YouTubeLiveChat 1.3.2 or later.
 ```Java
-chat.setUserData(Map<String String>);
+chat.setUserData(Map<String, String>);
 ```
 Next, you can send a message using ```YouTubeLiveChat#sendMessage()```.
 ```Java

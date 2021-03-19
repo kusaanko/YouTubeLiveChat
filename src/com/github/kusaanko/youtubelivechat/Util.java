@@ -382,6 +382,7 @@ public class Util {
         HttpURLConnection connection = (HttpURLConnection) u.openConnection();
         header.put("Content-Type", "application/json");
         header.put("Content-Length", String.valueOf(data.length()));
+        header.put("User-Agent", YouTubeLiveChat.userAgent);
         for (String key : header.keySet()) {
             connection.setRequestProperty(key, header.get(key));
         }
@@ -409,6 +410,7 @@ public class Util {
         HttpURLConnection connection = (HttpURLConnection) u.openConnection();
         header.put("Content-Type", "application/json");
         header.put("Content-Length", String.valueOf(data.length()));
+        header.put("User-Agent", YouTubeLiveChat.userAgent);
         for (String key : header.keySet()) {
             connection.setRequestProperty(key, header.get(key));
         }

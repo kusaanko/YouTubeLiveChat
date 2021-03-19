@@ -293,9 +293,6 @@ Next, you can send a message using ```YouTubeLiveChat#sendMessage()```.
 ```Java
 chat.sendMessage("Message that you want to send");
 ```
-**To Chrome user**  
-You can't use the IDs that written in Chrome's cookie.  
-I'm sorry, but please use another browser's cookie.
 
 ## Reset (YouTubeLiveChat 1.1 or later)
 If you have an error, you can reset YouTubeLiveChat instance.

@@ -359,7 +359,7 @@ public class Util {
     public static String getPageContent(String url, Map<String, String> header) throws IOException {
         URL u = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) u.openConnection();
-        header.put("User-Agent", YouTubeLiveChat.userAgent);
+        putRequestHeader(header);
         for (String key : header.keySet()) {
             connection.setRequestProperty(key, header.get(key));
         }
@@ -380,9 +380,9 @@ public class Util {
     public static String getPageContentWithJson(String url, String data, Map<String, String> header) throws IOException {
         URL u = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) u.openConnection();
+        putRequestHeader(header);
         header.put("Content-Type", "application/json");
         header.put("Content-Length", String.valueOf(data.length()));
-        header.put("User-Agent", YouTubeLiveChat.userAgent);
         for (String key : header.keySet()) {
             connection.setRequestProperty(key, header.get(key));
         }
@@ -408,9 +408,9 @@ public class Util {
     public static void sendHttpRequestWithJson(String url, String data, Map<String, String> header) throws IOException {
         URL u = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) u.openConnection();
+        putRequestHeader(header);
         header.put("Content-Type", "application/json");
         header.put("Content-Length", String.valueOf(data.length()));
-        header.put("User-Agent", YouTubeLiveChat.userAgent);
         for (String key : header.keySet()) {
             connection.setRequestProperty(key, header.get(key));
         }
@@ -422,6 +422,11 @@ public class Util {
         connection.connect();
         connection.getInputStream();
         connection.disconnect();
+    }
+
+    private static void putRequestHeader(Map<String, String> header) {
+        header.put("Accept-Charset", "utf-8");
+        header.put("User-Agent", YouTubeLiveChat.userAgent);
     }
 
     public static String generateClientMessageId() {

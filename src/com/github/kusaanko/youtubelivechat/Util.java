@@ -388,7 +388,7 @@ public class Util {
         }
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
-        OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8");
+        OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
         writer.write(data);
         writer.close();
         connection.connect();
@@ -416,7 +416,7 @@ public class Util {
         }
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
-        OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8");
+        OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
         writer.write(data);
         writer.close();
         connection.connect();

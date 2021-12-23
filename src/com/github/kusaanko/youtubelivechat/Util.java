@@ -417,6 +417,7 @@ public class Util {
         writer.write(data);
         writer.close();
         connection.connect();
+        connection.getInputStream();
         connection.disconnect();
     }
 

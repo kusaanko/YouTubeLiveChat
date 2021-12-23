@@ -213,7 +213,7 @@ public class YouTubeLiveChat {
                 }
             }
         } catch (IOException exception) {
-            throw new IOException("Can't get youtube live chat!");
+            throw new IOException("Can't get youtube live chat!", exception);
         }
     }
 
@@ -243,7 +243,7 @@ public class YouTubeLiveChat {
             }
             Util.sendHttpRequestWithJson(liveChatSendMessageApi + this.apiKey, this.getPayloadToSendMessage(message), this.getHeader());
         } catch (IOException exception) {
-            throw new IOException("Couldn't send a message!");
+            throw new IOException("Couldn't send a message!", exception);
         }
     }
 

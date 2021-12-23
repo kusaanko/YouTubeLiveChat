@@ -417,8 +417,19 @@ public class Util {
         writer.write(data);
         writer.close();
         connection.connect();
-        connection.getInputStream();
-        connection.disconnect();
+        try {
+            connection.getInputStream();
+            connection.disconnect();
+        } catch (IOException e) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+            String s;
+            StringBuilder str = new StringBuilder();
+            while((s = reader.readLine()) != null) {
+                str.append(s);
+            }
+            connection.disconnect();
+            throw new IOException(str.toString());
+        }
     }
 
     private static void putRequestHeader(Map<String, String> header) {

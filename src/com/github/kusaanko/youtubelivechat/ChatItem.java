@@ -28,6 +28,12 @@ public class ChatItem {
     protected int endBackgroundColor;
     protected int durationSec;
     protected int fullDurationSec;
+    //If moderator enabled
+    protected String contextMenuParams;
+    protected String pinToTopParams;
+    protected String chatDeleteParams;
+    protected String timeBanParams;
+    protected String userBanParams;
 
     protected ChatItem() {
         this.authorType = new ArrayList<>();

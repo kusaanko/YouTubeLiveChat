@@ -20,6 +20,8 @@ public class YouTubeLiveChat {
     private static final String liveChatApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key=";
     private static final String liveChatReplayApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat_replay?key=";
     private static final String liveChatSendMessageApi = "https://www.youtube.com/youtubei/v1/live_chat/send_message?key=";
+    private static final String liveChatTimeBanApi = "https://studio.youtube.com/youtubei/v1/live_chat/moderate?key=";
+    private static final String liveChatContextMenuApi = "https://www.youtube.com/youtubei/v1/live_chat/get_item_context_menu?key=";
 
     private String videoId;
     private String channelId;
@@ -39,7 +41,7 @@ public class YouTubeLiveChat {
     private int commentCounter;
     private String clientMessageId;
     private String params;
-    private String SAPISID, HSID, SSID, APISID, SID;
+    private String SAPISID, HSID, SSID, APISID, SID, LOGIN_INFO;
 
     private MessageDigest sha1;
 
@@ -244,6 +246,38 @@ public class YouTubeLiveChat {
         }
     }
 
+    /**
+     * Send time ban to chat message's author
+     * You need to set user data using setUserData() before calling this method
+     *
+     * @param chatItem origin chat message to delete, then ban the chat's author
+     * @throws IOException           Http request error
+     * @throws IllegalStateException The IDs are not set error
+     */
+    public void sendTimeBan(ChatItem chatItem) throws IOException, IllegalStateException {
+        if (this.isReplay) {
+            throw new IllegalStateException("This live is replay! You can ban a user for 300 secs if this live isn't replay.");
+        }
+        if (!this.hasAllIDs()) {
+            throw new IllegalStateException("You need to set user data using setUserData()");
+        }
+
+        try {
+            if (this.datasyncId == null) {
+                throw new IOException("datasyncId is null! Please call reset() or set user data.");
+            }
+            if (chatItem.timeBanParams == null) {
+                getContextMenu(chatItem);
+            }
+            if(chatItem.timeBanParams == null) {
+                throw new IllegalStateException("timeBanParams is null! Check if you have permission or use setUserData() first.");
+            }
+            Util.sendHttpRequestWithJson(liveChatTimeBanApi + this.apiKey, this.getPayloadToTimeBan(chatItem), this.getHeader());
+        } catch (IOException exception) {
+            throw new IOException("Couldn't ban user!", exception);
+        }
+    }
+
 
     /**
      * Language used to get chat
@@ -269,10 +303,11 @@ public class YouTubeLiveChat {
      * @param ids The Map that contains these keys: SAPISID, HSID, SSID, APISID and SID
      */
     public void setUserData(Map<String, String> ids) {
-        if (!ids.containsKey("SAPISID") || !ids.containsKey("HSID") || !ids.containsKey("SSID") || !ids.containsKey("APISID") || !ids.containsKey("SID"))
+        if (!ids.containsKey("SAPISID") || !ids.containsKey("HSID") || !ids.containsKey("SSID") || !ids.containsKey("APISID") || !ids.containsKey("SID")
+            || !ids.containsKey("LOGIN_INFO"))
             throw new IllegalArgumentException("The map didn't contain any ids.");
 
-        this.setUserData(ids.get("SAPISID"), ids.get("HSID"), ids.get("SSID"), ids.get("APISID"), ids.get("SID"));
+        this.setUserData(ids.get("SAPISID"), ids.get("HSID"), ids.get("SSID"), ids.get("APISID"), ids.get("SID"), ids.get("LOGIN_INFO"));
     }
 
     /**
@@ -284,13 +319,15 @@ public class YouTubeLiveChat {
      * @param SSID    SSID
      * @param APISID  APISID
      * @param SID     SID
+     * @param LOGIN_INFO LOGIN_INFO
      */
-    public void setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID) {
+    public void setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID, String LOGIN_INFO) {
         this.SAPISID = SAPISID;
         this.HSID = HSID;
         this.SSID = SSID;
         this.APISID = APISID;
         this.SID = SID;
+        this.LOGIN_INFO = LOGIN_INFO;
 
         try {
             this.reset();
@@ -399,6 +436,11 @@ public class YouTubeLiveChat {
                     }
                 }
             }
+            // Context Menu Params
+            String contextMenuParams = Util.getJSONValueString(Util.getJSONMap(liveChatTextMessageRenderer,"contextMenuEndpoint","liveChatItemContextMenuEndpoint"),"params");
+            if(contextMenuParams != null) {
+                chatItem.contextMenuParams = contextMenuParams;
+            }
         }
         if (action.containsKey("liveChatViewerEngagementMessageRenderer")) {
             Map<String, Object> liveChatViewerEngagementMessageRenderer = (Map<String, Object>) action.get("liveChatViewerEngagementMessageRenderer");
@@ -487,7 +529,7 @@ public class YouTubeLiveChat {
                         }
                     }
                     emoji.shortcuts = shortcuts;
-                    text.append(" ").append(shortcuts.get(0)).append(" ");
+                    if(!shortcuts.isEmpty()) text.append(" ").append(shortcuts.get(0)).append(" ");
                     List<Object> searchTermsList = Util.getJSONList(emojiMap, "searchTerms");
                     ArrayList<String> searchTerms = new ArrayList<>();
                     if (searchTermsList != null) {
@@ -699,6 +741,25 @@ public class YouTubeLiveChat {
         return Util.toJSON(json);
     }
 
+    private String getPayloadToTimeBan(ChatItem item) {
+        Map<String, Object> json = new LinkedHashMap<>();
+        Map<String, Object> context = new LinkedHashMap<>();
+        Map<String, Object> user = new LinkedHashMap<>();
+        Map<String, Object> client = new LinkedHashMap<>();
+        if (this.commentCounter >= Integer.MAX_VALUE - 1) {
+            this.commentCounter = 0;
+        }
+        json.put("context", context);
+        context.put("client", client);
+        client.put("clientName", "WEB");
+        client.put("clientVersion", this.getClientVersion());
+        context.put("user", user);
+        user.put("onBehalfOfUser", datasyncId);
+        json.put("params", item.timeBanParams);
+
+        return Util.toJSON(json);
+    }
+
     private Map<String, String> getHeader() {
         HashMap<String, String> header = new HashMap<>();
         if (!this.hasAllIDs()) return header;
@@ -710,9 +771,46 @@ public class YouTubeLiveChat {
         header.put("Authorization", "SAPISIDHASH " + time + "_" + String.format("%040x", new BigInteger(1, sha1_result)));
         header.put("X-Origin", origin);
         header.put("Origin", origin);
-        header.put("Cookie", String.format("SAPISID=%s; HSID=%s; SSID=%s; APISID=%s; SID=%s;", this.SAPISID, this.HSID, this.SSID, this.APISID, this.SID));
-
+        //header.put("Cookie", String.format("SAPISID=%s; HSID=%s; SSID=%s; APISID=%s; SID=%s; LOGIN_INFO=%s;", this.SAPISID, this.HSID, this.SSID, this.APISID, this.SID, this.LOGIN_INFO));
+        ***REMOVED***
+        header.put("sec-fetch-user","?1");
         return header;
+    }
+
+    private void getContextMenu(ChatItem chatItem) {
+        try {
+            String rawJson = Util.getPageContentWithJson(liveChatContextMenuApi + apiKey + "&params=" + chatItem.contextMenuParams, getPayloadToSendMessage("asdf"), getHeader());
+            Map<String, Object> json = Util.toJSON(rawJson);
+            List<Object> items = Util.getJSONList(json,"items","liveChatItemContextMenuSupportedRenderers","menuRenderer");
+            for(Object obj : items) {
+                Map<String, Object> item = (Map<String, Object>) obj;
+                Map<String,Object> menuServiceItemRenderer = Util.getJSONMap(item,"menuServiceItemRenderer");
+                if(menuServiceItemRenderer != null) {
+                    String iconType = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"icon"),"iconType");
+                    switch (iconType) {
+                        case "KEEP":
+                            chatItem.pinToTopParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"serviceEndpoint", "liveChatActionEndpoint"),"params");
+                            break;
+                        case "DELETE":
+                            chatItem.chatDeleteParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"serviceEndpoint","moderateLiveChatEndpoint"),"params");
+                            break;
+                        case "HOURGLASS":
+                            chatItem.timeBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"serviceEndpoint","moderateLiveChatEndpoint"),"params");
+                            break;
+                        case "REMOVE_CIRCLE":
+                            chatItem.userBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"serviceEndpoint","moderateLiveChatEndpoint"),"params");
+                            break;
+                        case "FLAG":
+                            break;
+                        default:
+                            System.out.println("Cannot understand menu for iconType: " + iconType);
+                            break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private MessageDigest getSHA1Engine() {

@@ -1,9 +1,6 @@
 package com.github.kusaanko.youtubelivechat;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -419,8 +416,28 @@ public class Util {
         OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
         writer.write(data);
         writer.close();
-        connection.connect();
-        connection.getInputStream();
+
+        try {
+            connection.connect();
+
+            //connection.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line;
+            StringBuilder str = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                str.append(line);
+            }
+            System.out.println(str);
+        } catch (IOException e) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+            String line;
+            StringBuilder str = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                str.append(line);
+            }
+            System.out.println(str);
+        }
+
         connection.disconnect();
     }
 

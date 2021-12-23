@@ -20,8 +20,9 @@ public class YouTubeLiveChat {
     private static final String liveChatApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key=";
     private static final String liveChatReplayApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat_replay?key=";
     private static final String liveChatSendMessageApi = "https://www.youtube.com/youtubei/v1/live_chat/send_message?key=";
-    private static final String liveChatTimeBanApi = "https://studio.youtube.com/youtubei/v1/live_chat/moderate?key=";
     private static final String liveChatContextMenuApi = "https://www.youtube.com/youtubei/v1/live_chat/get_item_context_menu?key=";
+    private static final String liveChatModerateApi = "https://studio.youtube.com/youtubei/v1/live_chat/moderate?key=";
+    private static final String liveChatActionApi = "https://studio.youtube.com/youtubei/v1/live_chat/live_chat_action?key=";
 
     private String videoId;
     private String channelId;
@@ -247,16 +248,80 @@ public class YouTubeLiveChat {
     }
 
     /**
-     * Send time ban to chat message's author
+     * Delete the chat
      * You need to set user data using setUserData() before calling this method
      *
      * @param chatItem origin chat message to delete, then ban the chat's author
      * @throws IOException           Http request error
      * @throws IllegalStateException The IDs are not set error
      */
-    public void sendTimeBan(ChatItem chatItem) throws IOException, IllegalStateException {
+    public void deleteChat(ChatItem chatItem) throws IOException, IllegalStateException {
         if (this.isReplay) {
-            throw new IllegalStateException("This live is replay! You can ban a user for 300 secs if this live isn't replay.");
+            throw new IllegalStateException("This live is replay! You can delete a chat if this live isn't replay.");
+        }
+
+        try {
+            if (this.datasyncId == null) {
+                throw new IOException("datasyncId is null! Please call reset() or set user data.");
+            }
+            if (chatItem.chatDeleteParams == null) {
+                if (!this.hasAllIDs()) {
+                    throw new IllegalStateException("You need to set user data using setUserData()");
+                }
+                getContextMenu(chatItem);
+            }
+            if(chatItem.chatDeleteParams == null) {
+                throw new IllegalStateException("chatDeleteParams is null! Check if you have permission or use setUserData() first.");
+            }
+            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.chatDeleteParams), this.getHeader());
+        } catch (IOException exception) {
+            throw new IOException("Couldn't delete chat!", exception);
+        }
+    }
+
+    /**
+     * Ban author of chat message for 300 seconds
+     * You need to set user data using setUserData() before calling this method
+     *
+     * @param chatItem origin chat message to delete, then ban the chat's author
+     * @throws IOException           Http request error
+     * @throws IllegalStateException The IDs are not set error
+     */
+    public void timeBanUser(ChatItem chatItem) throws IOException, IllegalStateException {
+        if (this.isReplay) {
+            throw new IllegalStateException("This live is replay! You can ban a user if this live isn't replay.");
+        }
+
+        try {
+            if (this.datasyncId == null) {
+                throw new IOException("datasyncId is null! Please call reset() or set user data.");
+            }
+            if (chatItem.timeBanParams == null) {
+                if (!this.hasAllIDs()) {
+                    throw new IllegalStateException("You need to set user data using setUserData()");
+                }
+                getContextMenu(chatItem);
+            }
+            if(chatItem.timeBanParams == null) {
+                throw new IllegalStateException("timeBanParams is null! Check if you have permission or use setUserData() first.");
+            }
+            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.timeBanParams), this.getHeader());
+        } catch (IOException exception) {
+            throw new IOException("Couldn't ban user!", exception);
+        }
+    }
+
+    /**
+     * Ban author of chat message
+     * You need to set user data using setUserData() before calling this method
+     *
+     * @param chatItem origin chat message to delete, then ban the chat's author
+     * @throws IOException           Http request error
+     * @throws IllegalStateException The IDs are not set error
+     */
+    public void banUser(ChatItem chatItem) throws IOException, IllegalStateException {
+        if (this.isReplay) {
+            throw new IllegalStateException("This live is replay! You can ban a user if this live isn't replay.");
         }
         if (!this.hasAllIDs()) {
             throw new IllegalStateException("You need to set user data using setUserData()");
@@ -266,18 +331,50 @@ public class YouTubeLiveChat {
             if (this.datasyncId == null) {
                 throw new IOException("datasyncId is null! Please call reset() or set user data.");
             }
-            if (chatItem.timeBanParams == null) {
+            if (chatItem.userBanParams == null) {
                 getContextMenu(chatItem);
             }
-            if(chatItem.timeBanParams == null) {
-                throw new IllegalStateException("timeBanParams is null! Check if you have permission or use setUserData() first.");
+            if(chatItem.userBanParams == null) {
+                throw new IllegalStateException("userBanParams is null! Check if you have permission or use setUserData() first.");
             }
-            Util.sendHttpRequestWithJson(liveChatTimeBanApi + this.apiKey, this.getPayloadToTimeBan(chatItem), this.getHeader());
+            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.userBanParams), this.getHeader());
         } catch (IOException exception) {
             throw new IOException("Couldn't ban user!", exception);
         }
     }
 
+
+    /**
+     * Pin this message to the top
+     * You need to set user data using setUserData() before calling this method
+     *
+     * @param chatItem origin chat message to delete, then ban the chat's author
+     * @throws IOException           Http request error
+     * @throws IllegalStateException The IDs are not set error
+     */
+    public void pinToTop(ChatItem chatItem) throws IOException, IllegalStateException {
+        if (this.isReplay) {
+            throw new IllegalStateException("This live is replay! You can pin a chat if this live isn't replay.");
+        }
+
+        try {
+            if (this.datasyncId == null) {
+                throw new IOException("datasyncId is null! Please call reset() or set user data.");
+            }
+            if (chatItem.pinToTopParams == null) {
+                if (!this.hasAllIDs()) {
+                    throw new IllegalStateException("You need to set user data using setUserData()");
+                }
+                getContextMenu(chatItem);
+            }
+            if(chatItem.pinToTopParams == null) {
+                throw new IllegalStateException("pinToTopParams is null! Check if you have permission or use setUserData() first.");
+            }
+            Util.sendHttpRequestWithJson(liveChatActionApi + this.apiKey, this.getPayloadClient(chatItem.pinToTopParams), this.getHeader());
+        } catch (IOException exception) {
+            throw new IOException("Couldn't pin chat!", exception);
+        }
+    }
 
     /**
      * Language used to get chat
@@ -741,7 +838,7 @@ public class YouTubeLiveChat {
         return Util.toJSON(json);
     }
 
-    private String getPayloadToTimeBan(ChatItem item) {
+    private String getPayloadClient(String params) {
         Map<String, Object> json = new LinkedHashMap<>();
         Map<String, Object> context = new LinkedHashMap<>();
         Map<String, Object> user = new LinkedHashMap<>();
@@ -755,7 +852,7 @@ public class YouTubeLiveChat {
         client.put("clientVersion", this.getClientVersion());
         context.put("user", user);
         user.put("onBehalfOfUser", datasyncId);
-        json.put("params", item.timeBanParams);
+        json.put("params", params);
 
         return Util.toJSON(json);
     }

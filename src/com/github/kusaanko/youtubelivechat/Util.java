@@ -416,28 +416,7 @@ public class Util {
         OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
         writer.write(data);
         writer.close();
-
-        try {
-            connection.connect();
-
-            //connection.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line;
-            StringBuilder str = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
-                str.append(line);
-            }
-            System.out.println(str);
-        } catch (IOException e) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
-            String line;
-            StringBuilder str = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
-                str.append(line);
-            }
-            System.out.println(str);
-        }
-
+        connection.connect();
         connection.disconnect();
     }
 

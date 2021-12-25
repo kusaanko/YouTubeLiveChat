@@ -428,7 +428,7 @@ public class Util {
                 str.append(s);
             }
             connection.disconnect();
-            throw new IOException(str.toString());
+            throw new IOException(str.toString(),e);
         }
     }
 

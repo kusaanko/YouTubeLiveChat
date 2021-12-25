@@ -46,6 +46,8 @@ public class YouTubeLiveChat {
 
     private MessageDigest sha1;
 
+    private String signedUserName;
+
     /**
      * Initialize YouTubeLiveChat
      *
@@ -210,6 +212,7 @@ public class YouTubeLiveChat {
                             }
                         }
                     }
+                    signedUserName = Util.getJSONValueString(liveChatContinuation,"viewerName");
                 }
             }
         } catch (IOException exception) {
@@ -710,6 +713,15 @@ public class YouTubeLiveChat {
         return (ArrayList<ChatItem>) this.chatItemTickerPaidMessages.clone();
     }
 
+    /**
+     * Get user's name (if setUserData() is done)
+     *
+     * @return Signed-in viewer's Username
+     */
+    public String getSignedUserName() {
+        return signedUserName;
+    }
+
     private void getInitialData(String id, IdType type) throws IOException {
         this.isInitDataAvailable = true;
         {
@@ -868,9 +880,7 @@ public class YouTubeLiveChat {
         header.put("Authorization", "SAPISIDHASH " + time + "_" + String.format("%040x", new BigInteger(1, sha1_result)));
         header.put("X-Origin", origin);
         header.put("Origin", origin);
-        //header.put("Cookie", String.format("SAPISID=%s; HSID=%s; SSID=%s; APISID=%s; SID=%s; LOGIN_INFO=%s;", this.SAPISID, this.HSID, this.SSID, this.APISID, this.SID, this.LOGIN_INFO));
-        ***REMOVED***
-        header.put("sec-fetch-user","?1");
+        header.put("Cookie", String.format("SAPISID=%s; HSID=%s; SSID=%s; APISID=%s; SID=%s; LOGIN_INFO=%s;", this.SAPISID, this.HSID, this.SSID, this.APISID, this.SID, this.LOGIN_INFO));
         return header;
     }
 

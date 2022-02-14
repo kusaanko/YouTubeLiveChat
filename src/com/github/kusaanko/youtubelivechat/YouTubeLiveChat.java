@@ -17,12 +17,12 @@ public class YouTubeLiveChat {
      */
     public static String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36,gzip(gfe)";
 
-    private static final String liveChatApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key=";
-    private static final String liveChatReplayApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat_replay?key=";
-    private static final String liveChatSendMessageApi = "https://www.youtube.com/youtubei/v1/live_chat/send_message?key=";
-    private static final String liveChatContextMenuApi = "https://www.youtube.com/youtubei/v1/live_chat/get_item_context_menu?key=";
-    private static final String liveChatModerateApi = "https://studio.youtube.com/youtubei/v1/live_chat/moderate?key=";
-    private static final String liveChatActionApi = "https://studio.youtube.com/youtubei/v1/live_chat/live_chat_action?key=";
+    private static final String liveChatApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key="; // view live chat
+    private static final String liveChatReplayApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat_replay?key="; // view chat replay
+    private static final String liveChatSendMessageApi = "https://www.youtube.com/youtubei/v1/live_chat/send_message?key="; // send chat
+    private static final String liveChatContextMenuApi = "https://www.youtube.com/youtubei/v1/live_chat/get_item_context_menu?key="; // get additional features
+    private static final String liveChatModerateApi = "https://studio.youtube.com/youtubei/v1/live_chat/moderate?key="; // moderation (delete chat, ban author)
+    private static final String liveChatActionApi = "https://studio.youtube.com/youtubei/v1/live_chat/live_chat_action?key="; // tools (pin message, make author as moderator)
 
     private String videoId;
     private String channelId;
@@ -254,11 +254,11 @@ public class YouTubeLiveChat {
      * Delete the chat
      * You need to set user data using setUserData() before calling this method
      *
-     * @param chatItem origin chat message to delete, then ban the chat's author
+     * @param chatItem Chat message to delete
      * @throws IOException           Http request error
      * @throws IllegalStateException The IDs are not set error
      */
-    public void deleteChat(ChatItem chatItem) throws IOException, IllegalStateException {
+    public void deleteMessage(ChatItem chatItem) throws IOException, IllegalStateException {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can delete a chat if this live isn't replay.");
         }
@@ -282,15 +282,17 @@ public class YouTubeLiveChat {
         }
     }
 
+    // @TODO: separate author delete & moderator delete
+
     /**
-     * Ban author of chat message for 300 seconds
+     * Ban message author for 300 seconds (+ delete message)
      * You need to set user data using setUserData() before calling this method
      *
-     * @param chatItem origin chat message to delete, then ban the chat's author
+     * @param chatItem Dhat message to delete and ban author
      * @throws IOException           Http request error
      * @throws IllegalStateException The IDs are not set error
      */
-    public void timeBanUser(ChatItem chatItem) throws IOException, IllegalStateException {
+    public void banAuthorTemporarily(ChatItem chatItem) throws IOException, IllegalStateException {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can ban a user if this live isn't replay.");
         }
@@ -315,14 +317,14 @@ public class YouTubeLiveChat {
     }
 
     /**
-     * Ban author of chat message
+     * Ban message author permanently from the channel (+ delete message)
      * You need to set user data using setUserData() before calling this method
      *
-     * @param chatItem origin chat message to delete, then ban the chat's author
+     * @param chatItem Chat message to delete and ban author
      * @throws IOException           Http request error
      * @throws IllegalStateException The IDs are not set error
      */
-    public void banUser(ChatItem chatItem) throws IOException, IllegalStateException {
+    public void banUserPermanently(ChatItem chatItem) throws IOException, IllegalStateException {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can ban a user if this live isn't replay.");
         }
@@ -348,14 +350,14 @@ public class YouTubeLiveChat {
 
 
     /**
-     * Pin this message to the top
+     * Pin message to top
      * You need to set user data using setUserData() before calling this method
      *
-     * @param chatItem origin chat message to delete, then ban the chat's author
+     * @param chatItem Chat message to pin
      * @throws IOException           Http request error
      * @throws IllegalStateException The IDs are not set error
      */
-    public void pinToTop(ChatItem chatItem) throws IOException, IllegalStateException {
+    public void pinMessage(ChatItem chatItem) throws IOException, IllegalStateException {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can pin a chat if this live isn't replay.");
         }
@@ -400,25 +402,41 @@ public class YouTubeLiveChat {
      * Set user data
      * The IDs are written in your browser's Cookie
      *
-     * @param ids The Map that contains these keys: SAPISID, HSID, SSID, APISID and SID
+     * @param ids The Map that contains these keys: SAPISID, HSID, SSID, APISID, SID, and LOGIN_INFO
      */
     public void setUserData(Map<String, String> ids) {
-        if (!ids.containsKey("SAPISID") || !ids.containsKey("HSID") || !ids.containsKey("SSID") || !ids.containsKey("APISID") || !ids.containsKey("SID")
-            || !ids.containsKey("LOGIN_INFO"))
+        if (!ids.containsKey("SAPISID") || !ids.containsKey("HSID") || !ids.containsKey("SSID") || !ids.containsKey("APISID") || !ids.containsKey("SID"))
             throw new IllegalArgumentException("The map didn't contain any ids.");
 
         this.setUserData(ids.get("SAPISID"), ids.get("HSID"), ids.get("SSID"), ids.get("APISID"), ids.get("SID"), ids.get("LOGIN_INFO"));
     }
 
     /**
+     * Deprecated. Add one more cookie 'LOGIN_INFO' to log in with specific channel.
+     * <br><br>
      * Set user data
      * The IDs are written in your browser's Cookie
      *
-     * @param SAPISID SAPIID
+     * @param SAPISID SAPISID
      * @param HSID    HSID
      * @param SSID    SSID
      * @param APISID  APISID
      * @param SID     SID
+     */
+    @Deprecated
+    public void setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID) {
+        this.setUserData(SAPISID, HSID, SSID, APISID, SID,null);
+    }
+
+    /**
+     * Set user data
+     * The IDs are written in your browser's Cookie
+     *
+     * @param SAPISID    SAPISID
+     * @param HSID       HSID
+     * @param SSID       SSID
+     * @param APISID     APISID
+     * @param SID        SID
      * @param LOGIN_INFO LOGIN_INFO
      */
     public void setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID, String LOGIN_INFO) {
@@ -880,7 +898,8 @@ public class YouTubeLiveChat {
         header.put("Authorization", "SAPISIDHASH " + time + "_" + String.format("%040x", new BigInteger(1, sha1_result)));
         header.put("X-Origin", origin);
         header.put("Origin", origin);
-        header.put("Cookie", String.format("SAPISID=%s; HSID=%s; SSID=%s; APISID=%s; SID=%s; LOGIN_INFO=%s;", this.SAPISID, this.HSID, this.SSID, this.APISID, this.SID, this.LOGIN_INFO));
+        header.put("Cookie", String.format("SAPISID=%s; HSID=%s; SSID=%s; APISID=%s; SID=%s;%s", this.SAPISID, this.HSID, this.SSID, this.APISID, this.SID,
+                this.LOGIN_INFO != null ? String.format(" LOGIN_INFO=%s;", this.LOGIN_INFO) : ""));
         return header;
     }
 
@@ -908,6 +927,10 @@ public class YouTubeLiveChat {
                             chatItem.userBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"serviceEndpoint","moderateLiveChatEndpoint"),"params");
                             break;
                         case "FLAG":
+                            // Report User
+                            break;
+                        case "ADD_MODERATOR":
+                            // Set author as moderator
                             break;
                         default:
                             System.out.println("Cannot understand menu for iconType: " + iconType);

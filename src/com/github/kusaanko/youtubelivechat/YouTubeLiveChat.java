@@ -434,7 +434,7 @@ public class YouTubeLiveChat {
             Pattern pattern = Pattern.compile("[^\\w]" + keys[i] + "=([^;]*);");
             Matcher matcher = pattern.matcher(all);
             if(matcher.find()) values[i] = matcher.group(1);
-            else if(!keys[i].equals("LOGIN_INFO")) throw new IllegalArgumentException("Cannot find cookie " + keys[i]);
+            else throw new IllegalArgumentException("Cannot find cookie " + keys[i]);
         }
 
         setUserData(values[0], values[1], values[2], values[3], values[4], values[5]);

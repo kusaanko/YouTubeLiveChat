@@ -305,25 +305,27 @@ chat.sendMessage("Message that you want to send");
 ```
 
 ## Delete message (YoutubeLiveChat 1.x or later)
-You can delete a message using ```ChatItem#delete()```. This function needs user data, user must be either the author of the message, moderator or owner to perform this action.
+You can delete a message using ```ChatItem#delete()```. This function needs user data. User must be either the author of the message, moderator or owner to perform this action.
 ```Java
 chatItem.delete();
 ```
 
-## Timeout the message author (YoutubeLiveChat 1.x or later)
+## Chat Moderation
+
+### Timeout the message author (YoutubeLiveChat 1.x or later)
 You can timeout the author of the message for 300 seconds using ```ChatItem#timeoutAuthor()```. This function needs user data. User must be either moderator or owner to perform this action.
 ```Java
 chatItem.timeoutAuthor();
 ```
 
-## Ban the message author (YoutubeLiveChat 1.x or later)
+### Ban the message author (YoutubeLiveChat 1.x or later)
 You can ban the author of the message from your channel permanently using ```ChatItem#banAuthor()```. This function needs user data. User must be either moderator or owner to perform this action.
 ```Java
 chatItem.banAuthor();
 ```
 
-## Pin message as banner (YoutubeLiveChat 1.x or later)
-You can pin a message as banner using ```ChatItem#pinAsBanner()```. This function needs user data. User must be either moderator or owner to perform this action.
+### Pin message as banner (YoutubeLiveChat 1.x or later)
+You can pin a message at the top banner in live chat using ```ChatItem#pinAsBanner()```. This function needs user data. User must be either moderator or owner to perform this action.
 ```Java
 chatItem.pinAsBanner();
 ```

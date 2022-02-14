@@ -9,6 +9,8 @@
  - Fetch replay of live chat without YouTube API
  - Supports message, Super Chat, Super Stickers and member
  - Send a message to live chat (Developed by @yadokari1130 )
+ - Delete message and moderate chat (Developed by @HURDOO )
+
 
 # How to install
 ## maven
@@ -279,19 +281,51 @@ for (Object obj : item.getMessageExtended()) {
 Emoji can include more than one shortcut.  
 To get emojis icon url, use ```Emoji#getIconURL()```. Download and use it!
 
+## Log in with your channel (YoutubeLiveChat 1.3 or later)
+You can participate in live chat with your channel. It needs some user data: SAPISID, HSID, SSID, APISID, SID, and LOGIN_INFO. The IDs are written in your browser's Cookie.
+You can set user data using ```YouTubeLiveChat#setUserData()``` for one of three ways:
+```Java
+// The most default way. IDs can be found in browser's Cookie.
+YoutubeLiveChat.setUserData("SAPISID", "HSID", "SSID", "APISID", "SID", "LOGIN_INFO");
+
+// You can use Map (YoutubeLiveChat 1.3.2 or later)
+YoutubeLiveChat.setUserData(Map<String, String>);
+
+// You can copy 'Cookies' header from browser request and paste here. (YoutubeLiveChat 1.x or later)
+// Format: "KEY1: VALUE1; KEY: VALUE2; ..."
+// Ignore other cookies that aren't needed (in below example, YSC will be ignored)
+YoutubeLiveChat.setUserData("SAPISID: ###; HSID: ###; LOGIN_INFO: ###; YSC: ###; APISID: ###; SID: ###; SSID: ###");
+```
+
+
 ## Send a message to the live chat (YouTubeLiveChat 1.3 or later)
-You can send a message to the live chat. This function needs some user data: SAPISID, HSID, SSID, APISID, and SID. The IDs are written in your browser's Cookie.  
-First, you need to set user data using ```YouTubeLiveChat#setUserData()```.
-```Java
-chat.setUserData("SAPISID", "HSID", "SSID", "APISID", "SID");
-```
-You can use Map YouTubeLiveChat 1.3.2 or later.
-```Java
-chat.setUserData(Map<String, String>);
-```
-Next, you can send a message using ```YouTubeLiveChat#sendMessage()```.
+You can send a message using ```YouTubeLiveChat#sendMessage()```. This function needs user data.
 ```Java
 chat.sendMessage("Message that you want to send");
+```
+
+## Delete message (YoutubeLiveChat 1.x or later)
+You can delete a message using ```ChatItem#delete()```. This function needs user data, user must be either the author of the message, moderator or owner to perform this action.
+```Java
+chatItem.delete();
+```
+
+## Timeout the message author (YoutubeLiveChat 1.x or later)
+You can timeout the author of the message for 300 seconds using ```ChatItem#timeoutAuthor()```. This function needs user data. User must be either moderator or owner to perform this action.
+```Java
+chatItem.timeoutAuthor();
+```
+
+## Ban the message author (YoutubeLiveChat 1.x or later)
+You can ban the author of the message from your channel permanently using ```ChatItem#banAuthor()```. This function needs user data. User must be either moderator or owner to perform this action.
+```Java
+chatItem.banAuthor();
+```
+
+## Pin message as banner (YoutubeLiveChat 1.x or later)
+You can pin a message as banner using ```ChatItem#pinAsBanner()```. This function needs user data. User must be either moderator or owner to perform this action.
+```Java
+chatItem.pinAsBanner();
 ```
 
 ## Reset (YouTubeLiveChat 1.1 or later)

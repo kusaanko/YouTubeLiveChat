@@ -22,7 +22,7 @@ public class YouTubeLiveChat {
     private static final String liveChatSendMessageApi = "https://www.youtube.com/youtubei/v1/live_chat/send_message?key="; // send chat
     private static final String liveChatContextMenuApi = "https://www.youtube.com/youtubei/v1/live_chat/get_item_context_menu?key="; // get additional features
     private static final String liveChatModerateApi = "https://studio.youtube.com/youtubei/v1/live_chat/moderate?key="; // moderation (delete chat, ban author)
-    private static final String liveChatActionApi = "https://studio.youtube.com/youtubei/v1/live_chat/live_chat_action?key="; // tools (pin message, make author as moderator)
+    private static final String liveChatActionApi = "https://studio.youtube.com/youtubei/v1/live_chat/live_chat_action?key="; // tools (pin message)
 
     private String videoId;
     private String channelId;
@@ -42,7 +42,7 @@ public class YouTubeLiveChat {
     private int commentCounter;
     private String clientMessageId;
     private String params;
-    private String SAPISID, HSID, SSID, APISID, SID, LOGIN_INFO;
+    private String SAPISID, HSID, SSID, APISID, SID, LOGIN_INFO; // LOGIN_INFO to select channel
 
     private MessageDigest sha1;
 
@@ -250,15 +250,7 @@ public class YouTubeLiveChat {
         }
     }
 
-    /**
-     * Delete the chat
-     * You need to set user data using setUserData() before calling this method
-     *
-     * @param chatItem Chat message to delete
-     * @throws IOException           Http request error
-     * @throws IllegalStateException The IDs are not set error
-     */
-    public void deleteMessage(ChatItem chatItem) throws IOException, IllegalStateException {
+    protected void deleteMessage(ChatItem chatItem) throws IOException, IllegalStateException {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can delete a chat if this live isn't replay.");
         }
@@ -272,9 +264,9 @@ public class YouTubeLiveChat {
                     throw new IllegalStateException("You need to set user data using setUserData()");
                 }
                 getContextMenu(chatItem);
-            }
-            if(chatItem.chatDeleteParams == null) {
-                throw new IllegalStateException("chatDeleteParams is null! Check if you have permission or use setUserData() first.");
+                if(chatItem.chatDeleteParams == null) {
+                    throw new IllegalStateException("chatDeleteParams is null! Check if you have permission or use setUserData() first.");
+                }
             }
             Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.chatDeleteParams), this.getHeader());
         } catch (IOException exception) {
@@ -282,17 +274,7 @@ public class YouTubeLiveChat {
         }
     }
 
-    // @TODO: separate author delete & moderator delete
-
-    /**
-     * Ban message author for 300 seconds (+ delete message)
-     * You need to set user data using setUserData() before calling this method
-     *
-     * @param chatItem Dhat message to delete and ban author
-     * @throws IOException           Http request error
-     * @throws IllegalStateException The IDs are not set error
-     */
-    public void banAuthorTemporarily(ChatItem chatItem) throws IOException, IllegalStateException {
+    protected void banAuthorTemporarily(ChatItem chatItem) throws IOException, IllegalStateException {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can ban a user if this live isn't replay.");
         }
@@ -306,9 +288,9 @@ public class YouTubeLiveChat {
                     throw new IllegalStateException("You need to set user data using setUserData()");
                 }
                 getContextMenu(chatItem);
-            }
-            if(chatItem.timeBanParams == null) {
-                throw new IllegalStateException("timeBanParams is null! Check if you have permission or use setUserData() first.");
+                if(chatItem.timeBanParams == null) {
+                    throw new IllegalStateException("timeBanParams is null! Check if you have permission or use setUserData() first.");
+                }
             }
             Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.timeBanParams), this.getHeader());
         } catch (IOException exception) {
@@ -316,14 +298,6 @@ public class YouTubeLiveChat {
         }
     }
 
-    /**
-     * Ban message author permanently from the channel (+ delete message)
-     * You need to set user data using setUserData() before calling this method
-     *
-     * @param chatItem Chat message to delete and ban author
-     * @throws IOException           Http request error
-     * @throws IllegalStateException The IDs are not set error
-     */
     public void banUserPermanently(ChatItem chatItem) throws IOException, IllegalStateException {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can ban a user if this live isn't replay.");
@@ -338,9 +312,9 @@ public class YouTubeLiveChat {
             }
             if (chatItem.userBanParams == null) {
                 getContextMenu(chatItem);
-            }
-            if(chatItem.userBanParams == null) {
-                throw new IllegalStateException("userBanParams is null! Check if you have permission or use setUserData() first.");
+                if(chatItem.userBanParams == null) {
+                    throw new IllegalStateException("userBanParams is null! Check if you have permission or use setUserData() first.");
+                }
             }
             Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.userBanParams), this.getHeader());
         } catch (IOException exception) {
@@ -348,15 +322,6 @@ public class YouTubeLiveChat {
         }
     }
 
-
-    /**
-     * Pin message to top
-     * You need to set user data using setUserData() before calling this method
-     *
-     * @param chatItem Chat message to pin
-     * @throws IOException           Http request error
-     * @throws IllegalStateException The IDs are not set error
-     */
     public void pinMessage(ChatItem chatItem) throws IOException, IllegalStateException {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can pin a chat if this live isn't replay.");
@@ -371,9 +336,9 @@ public class YouTubeLiveChat {
                     throw new IllegalStateException("You need to set user data using setUserData()");
                 }
                 getContextMenu(chatItem);
-            }
-            if(chatItem.pinToTopParams == null) {
-                throw new IllegalStateException("pinToTopParams is null! Check if you have permission or use setUserData() first.");
+                if(chatItem.pinToTopParams == null) {
+                    throw new IllegalStateException("pinToTopParams is null! Check if you have permission or use setUserData() first.");
+                }
             }
             Util.sendHttpRequestWithJson(liveChatActionApi + this.apiKey, this.getPayloadClient(chatItem.pinToTopParams), this.getHeader());
         } catch (IOException exception) {
@@ -399,8 +364,8 @@ public class YouTubeLiveChat {
     }
 
     /**
-     * Set user data
-     * The IDs are written in your browser's Cookie
+     * Set user data.
+     * The IDs are written in your browser's.
      *
      * @param ids The Map that contains these keys: SAPISID, HSID, SSID, APISID, SID, and LOGIN_INFO
      */
@@ -412,16 +377,15 @@ public class YouTubeLiveChat {
     }
 
     /**
-     * Deprecated. Add one more cookie 'LOGIN_INFO' to log in with specific channel.
-     * <br><br>
-     * Set user data
-     * The IDs are written in your browser's Cookie
+     * Set user data,
+     * The IDs are written in your browser's Cookie.
      *
      * @param SAPISID SAPISID
      * @param HSID    HSID
      * @param SSID    SSID
      * @param APISID  APISID
      * @param SID     SID
+     * @deprecated Add 'LOGIN_INFO' to select channel. {@link #setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID, String LOGIN_INFO)}
      */
     @Deprecated
     public void setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID) {
@@ -429,8 +393,8 @@ public class YouTubeLiveChat {
     }
 
     /**
-     * Set user data
-     * The IDs are written in your browser's Cookie
+     * Set user data.
+     * The IDs are written in your browser's Cookie.
      *
      * @param SAPISID    SAPISID
      * @param HSID       HSID
@@ -454,6 +418,28 @@ public class YouTubeLiveChat {
         }
     }
 
+    /**
+     * Set user data.
+     * Cookies can be found in Chrome Devtools(F12) 'Network' tab, 'get_live_chat' request.
+     * Any other cookies are ignored.
+     *
+     * @param cookies string that contains these cookies: SAPISID, HSID, SSID, APISID, SID, and LOGIN_INFO. format: "APISID:###; HSID:###; SSID: ..."
+     */
+    public void setUserData(String cookies) {
+        String all = String.format(";%s;", cookies);
+        String[] keys = new String[]{"SAPISID","HSID","SSID","APISID","SID","LOGIN_INFO"};
+        String[] values = new String[6];
+
+        for(int i=0;i<6;i++) {
+            Pattern pattern = Pattern.compile("[^\\w]" + keys[i] + "=([^;]*);");
+            Matcher matcher = pattern.matcher(all);
+            if(matcher.find()) values[i] = matcher.group(1);
+            else if(!keys[i].equals("LOGIN_INFO")) throw new IllegalArgumentException("Cannot find cookie " + keys[i]);
+        }
+
+        setUserData(values[0], values[1], values[2], values[3], values[4], values[5]);
+    }
+
     private void parseActions(List<Object> json) {
         for (Object i : json) {
             Map<String, Object> actions = (Map<String, Object>) i;
@@ -472,7 +458,7 @@ public class YouTubeLiveChat {
                 ChatItem chatItem = null;
                 Map<String, Object> item = Util.getJSONMap(addChatItemAction, "item");
                 if (item != null) {
-                    chatItem = new ChatItem();
+                    chatItem = new ChatItem(this);
                     this.parseChatItem(chatItem, item);
                 }
                 if (chatItem != null && chatItem.id != null) {
@@ -482,7 +468,7 @@ public class YouTubeLiveChat {
             //Pinned message
             Map<String, Object> contents = Util.getJSONMap(actions, "addBannerToLiveChatCommand", "bannerRenderer", "liveChatBannerRenderer", "contents");
             if (contents != null) {
-                ChatItem chatItem = new ChatItem();
+                ChatItem chatItem = new ChatItem(this);
                 this.parseChatItem(chatItem, contents);
                 this.bannerItem = chatItem;
             }
@@ -903,7 +889,7 @@ public class YouTubeLiveChat {
         return header;
     }
 
-    private void getContextMenu(ChatItem chatItem) {
+    protected void getContextMenu(ChatItem chatItem) {
         try {
             String rawJson = Util.getPageContentWithJson(liveChatContextMenuApi + apiKey + "&params=" + chatItem.contextMenuParams, getPayloadToSendMessage("asdf"), getHeader());
             Map<String, Object> json = Util.toJSON(rawJson);
@@ -926,14 +912,11 @@ public class YouTubeLiveChat {
                         case "REMOVE_CIRCLE":
                             chatItem.userBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"serviceEndpoint","moderateLiveChatEndpoint"),"params");
                             break;
-                        case "FLAG":
-                            // Report User
-                            break;
-                        case "ADD_MODERATOR":
-                            // Set author as moderator
-                            break;
+                        case "FLAG": // Report
+                        case "ADD_MODERATOR": //Set author as moderator
+                        case "REMOVE_MODERATOR": //Set author as normal
                         default:
-                            System.out.println("Cannot understand menu for iconType: " + iconType);
+                            //System.out.println("Cannot understand menu for iconType: " + iconType);
                             break;
                     }
                 }

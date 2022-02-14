@@ -1,5 +1,6 @@
 package com.github.kusaanko.youtubelivechat;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,11 +35,22 @@ public class ChatItem {
     protected String chatDeleteParams;
     protected String timeBanParams;
     protected String userBanParams;
+    //Connected chat
+    protected YouTubeLiveChat liveChat;
 
+    /**
+     * @deprecated {@link #ChatItem(YouTubeLiveChat liveChat)}
+     */
+    @Deprecated
     protected ChatItem() {
+        this(null);
+    }
+
+    protected ChatItem(YouTubeLiveChat liveChat) {
         this.authorType = new ArrayList<>();
         this.authorType.add(AuthorType.NORMAL);
         this.type = ChatItemType.MESSAGE;
+        this.liveChat = liveChat;
     }
 
     /**
@@ -292,5 +304,54 @@ public class ChatItem {
                 ", durationSec=" + durationSec +
                 ", fullDurationSec=" + fullDurationSec +
                 '}';
+    }
+
+    /**
+     * Delete this chat.
+     * You need to set user data using setUserData() before calling this method.
+     * User must be either author of chat, moderator or owner.
+     *
+     * @throws IOException           Http request error
+     * @throws IllegalStateException The IDs are not set or permission denied error
+     */
+    public void delete() throws IOException {
+        liveChat.deleteMessage(this);
+    }
+
+    /**
+     * Ban chat author for 300 seconds (+ delete chat).
+     * You need to set user data using setUserData() before calling this method.
+     * User must be either moderator or owner.
+     *
+     * @throws IOException           Http request error
+     * @throws IllegalStateException The IDs are not set or permission denied error
+     */
+    public void timeoutAuthor() throws IOException {
+        liveChat.banAuthorTemporarily(this);
+    }
+
+    /**
+     * Ban chat author permanently from the channel (+ delete chat).
+     * You need to set user data using setUserData() before calling this method.
+     * User must be either moderator or owner.
+     *
+     * @throws IOException           Http request error
+     * @throws IllegalStateException The IDs are not set or permission denied error
+     */
+    public void banAuthor() throws IOException {
+        liveChat.banUserPermanently(this);
+    }
+
+
+    /**
+     * Pin this chat as banner.
+     * You need to set user data using setUserData() before calling this method.
+     * User must be either moderator or owner.
+     *
+     * @throws IOException           Http request error
+     * @throws IllegalStateException The IDs are not set or permission denied error
+     */
+    public void pinAsBanner() throws IOException {
+        liveChat.pinMessage(this);
     }
 }

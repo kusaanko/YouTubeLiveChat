@@ -32,9 +32,10 @@ public class ChatItem {
     //If moderator enabled
     protected String contextMenuParams;
     protected String pinToTopParams;
-    protected String chatDeleteParams;
+    protected String chatDeleteParams; // can be executed by author too
     protected String timeBanParams;
     protected String userBanParams;
+    protected String userUnbanParams;
     //Connected chat
     protected YouTubeLiveChat liveChat;
 
@@ -334,12 +335,26 @@ public class ChatItem {
      * Ban chat author permanently from the channel (+ delete chat).
      * You need to set user data using setUserData() before calling this method.
      * User must be either moderator or owner.
+     * <br>
+     * <b>**Use with cautions!!**</b> It is recommended to store these banned ChatItem so you can unban later.
      *
      * @throws IOException           Http request error
      * @throws IllegalStateException The IDs are not set or permission denied error
      */
     public void banAuthor() throws IOException {
         liveChat.banUserPermanently(this);
+    }
+
+    /**
+     * Unban chat author who was permanently banned from the channel (deleted chat won't be recovered).
+     * You need to set user data using setUserData() before calling this method.
+     * User must be either moderator or owner.
+     *
+     * @throws IOException           Http request error
+     * @throws IllegalStateException The IDs are not set or permission denied error
+     */
+    public void unbanAuthor() throws IOException {
+        liveChat.unbanUser(this);
     }
 
 

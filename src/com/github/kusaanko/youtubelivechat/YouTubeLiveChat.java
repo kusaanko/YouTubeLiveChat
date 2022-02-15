@@ -322,6 +322,30 @@ public class YouTubeLiveChat {
         }
     }
 
+    public void unbanUser(ChatItem chatItem) throws IOException, IllegalStateException {
+        if (this.isReplay) {
+            throw new IllegalStateException("This live is replay! You can ban a user if this live isn't replay.");
+        }
+        if (!this.hasAllIDs()) {
+            throw new IllegalStateException("You need to set user data using setUserData()");
+        }
+
+        try {
+            if (this.datasyncId == null) {
+                throw new IOException("datasyncId is null! Please call reset() or set user data.");
+            }
+            if (chatItem.userUnbanParams == null) {
+                getContextMenu(chatItem);
+                if(chatItem.userUnbanParams == null) {
+                    throw new IllegalStateException("userUnbanParams is null! Check if you have permission or use setUserData() first.");
+                }
+            }
+            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.userUnbanParams), this.getHeader());
+        } catch (IOException exception) {
+            throw new IOException("Couldn't unban user!", exception);
+        }
+    }
+
     public void pinMessage(ChatItem chatItem) throws IOException, IllegalStateException {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can pin a chat if this live isn't replay.");
@@ -889,7 +913,7 @@ public class YouTubeLiveChat {
         return header;
     }
 
-    protected void getContextMenu(ChatItem chatItem) {
+    public void getContextMenu(ChatItem chatItem) {
         try {
             String rawJson = Util.getPageContentWithJson(liveChatContextMenuApi + apiKey + "&params=" + chatItem.contextMenuParams, getPayloadToSendMessage("asdf"), getHeader());
             Map<String, Object> json = Util.toJSON(rawJson);
@@ -899,6 +923,7 @@ public class YouTubeLiveChat {
                 Map<String,Object> menuServiceItemRenderer = Util.getJSONMap(item,"menuServiceItemRenderer");
                 if(menuServiceItemRenderer != null) {
                     String iconType = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"icon"),"iconType");
+                    System.out.println(iconType);
                     switch (iconType) {
                         case "KEEP":
                             chatItem.pinToTopParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"serviceEndpoint", "liveChatActionEndpoint"),"params");
@@ -911,6 +936,9 @@ public class YouTubeLiveChat {
                             break;
                         case "REMOVE_CIRCLE":
                             chatItem.userBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"serviceEndpoint","moderateLiveChatEndpoint"),"params");
+                            break;
+                        case "ADD_CIRCLE":
+                            chatItem.userUnbanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint","moderateLiveChatEndpoint"), "params");
                             break;
                         case "FLAG": // Report
                         case "ADD_MODERATOR": //Set author as moderator

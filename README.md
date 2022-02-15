@@ -326,9 +326,10 @@ chatItem.banAuthor();
 ```
 
 ### Unban the message author (YoutubeLiveChat 1.x or later)
-You can unban the author of the message who was permanently banned from your channel using ```ChatItem#banAuthor()```. This function needs user data. User must be either moderator or owner to perform this action.
+You can unban the author of the message who was permanently banned from your channel using ```ChatItem#unbanAuthor()```. This function needs user data. User must be either moderator or owner to perform this action.
+It is recommended to store banned ChatItems when you ban user, so that you can unban later.
 ```Java
-chatItem.banAuthor();
+chatItem.unbanAuthor();
 ```
 
 ### Pin message as banner (YoutubeLiveChat 1.x or later)

@@ -320,6 +320,13 @@ chatItem.timeoutAuthor();
 
 ### Ban the message author (YoutubeLiveChat 1.x or later)
 You can ban the author of the message from your channel permanently using ```ChatItem#banAuthor()```. This function needs user data. User must be either moderator or owner to perform this action.
+Always be cautious when you use this method. It is recommended to store banned ChatItems so that you can unban later.
+```Java
+chatItem.banAuthor();
+```
+
+### Unban the message author (YoutubeLiveChat 1.x or later)
+You can unban the author of the message who was permanently banned from your channel using ```ChatItem#banAuthor()```. This function needs user data. User must be either moderator or owner to perform this action.
 ```Java
 chatItem.banAuthor();
 ```

@@ -20,9 +20,9 @@ public class YouTubeLiveChat {
     private static final String liveChatApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key="; // view live chat
     private static final String liveChatReplayApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat_replay?key="; // view chat replay
     private static final String liveChatSendMessageApi = "https://www.youtube.com/youtubei/v1/live_chat/send_message?key="; // send chat
-    private static final String liveChatContextMenuApi = "https://www.youtube.com/youtubei/v1/live_chat/get_item_context_menu?key="; // get additional features
-    private static final String liveChatModerateApi = "https://studio.youtube.com/youtubei/v1/live_chat/moderate?key="; // moderation (delete chat, ban author)
-    private static final String liveChatActionApi = "https://studio.youtube.com/youtubei/v1/live_chat/live_chat_action?key="; // tools (pin message)
+    private static final String liveChatContextMenuApi = "https://www.youtube.com/youtubei/v1/live_chat/get_item_context_menu?key="; // get chat item menu
+    private static final String liveChatModerateApi = "https://studio.youtube.com/youtubei/v1/live_chat/moderate?key="; // moderation (delete, ban, unban)
+    private static final String liveChatActionApi = "https://studio.youtube.com/youtubei/v1/live_chat/live_chat_action?key="; // tools (pin)
 
     private String videoId;
     private String channelId;
@@ -45,8 +45,6 @@ public class YouTubeLiveChat {
     private String SAPISID, HSID, SSID, APISID, SID, LOGIN_INFO; // LOGIN_INFO to select channel
 
     private MessageDigest sha1;
-
-    private String signedUserName;
 
     /**
      * Initialize YouTubeLiveChat
@@ -212,7 +210,6 @@ public class YouTubeLiveChat {
                             }
                         }
                     }
-                    signedUserName = Util.getJSONValueString(liveChatContinuation,"viewerName");
                 }
             }
         } catch (IOException exception) {
@@ -389,7 +386,7 @@ public class YouTubeLiveChat {
 
     /**
      * Set user data.
-     * The IDs are written in your browser's.
+     * The IDs are written in your browser's Cookie.
      *
      * @param ids The Map that contains these keys: SAPISID, HSID, SSID, APISID, SID, and LOGIN_INFO
      */
@@ -401,7 +398,7 @@ public class YouTubeLiveChat {
     }
 
     /**
-     * Set user data,
+     * Set user data.
      * The IDs are written in your browser's Cookie.
      *
      * @param SAPISID SAPISID
@@ -741,15 +738,6 @@ public class YouTubeLiveChat {
         return (ArrayList<ChatItem>) this.chatItemTickerPaidMessages.clone();
     }
 
-    /**
-     * Get user's name (if setUserData() is done)
-     *
-     * @return Signed-in viewer's Username
-     */
-    public String getSignedUserName() {
-        return signedUserName;
-    }
-
     private void getInitialData(String id, IdType type) throws IOException {
         this.isInitDataAvailable = true;
         {
@@ -915,37 +903,39 @@ public class YouTubeLiveChat {
 
     public void getContextMenu(ChatItem chatItem) {
         try {
-            String rawJson = Util.getPageContentWithJson(liveChatContextMenuApi + apiKey + "&params=" + chatItem.contextMenuParams, getPayloadToSendMessage("asdf"), getHeader());
+            String rawJson = Util.getPageContentWithJson(liveChatContextMenuApi + apiKey + "&params=" + chatItem.contextMenuParams, getPayloadToSendMessage(""), getHeader());
             Map<String, Object> json = Util.toJSON(rawJson);
             List<Object> items = Util.getJSONList(json,"items","liveChatItemContextMenuSupportedRenderers","menuRenderer");
-            for(Object obj : items) {
-                Map<String, Object> item = (Map<String, Object>) obj;
-                Map<String,Object> menuServiceItemRenderer = Util.getJSONMap(item,"menuServiceItemRenderer");
-                if(menuServiceItemRenderer != null) {
-                    String iconType = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"icon"),"iconType");
-                    System.out.println(iconType);
-                    switch (iconType) {
-                        case "KEEP":
-                            chatItem.pinToTopParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"serviceEndpoint", "liveChatActionEndpoint"),"params");
-                            break;
-                        case "DELETE":
-                            chatItem.chatDeleteParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"serviceEndpoint","moderateLiveChatEndpoint"),"params");
-                            break;
-                        case "HOURGLASS":
-                            chatItem.timeBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"serviceEndpoint","moderateLiveChatEndpoint"),"params");
-                            break;
-                        case "REMOVE_CIRCLE":
-                            chatItem.userBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,"serviceEndpoint","moderateLiveChatEndpoint"),"params");
-                            break;
-                        case "ADD_CIRCLE":
-                            chatItem.userUnbanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint","moderateLiveChatEndpoint"), "params");
-                            break;
-                        case "FLAG": // Report
-                        case "ADD_MODERATOR": //Set author as moderator
-                        case "REMOVE_MODERATOR": //Set author as normal
-                        default:
-                            //System.out.println("Cannot understand menu for iconType: " + iconType);
-                            break;
+            if(items != null) {
+                for(Object obj : items) {
+                    Map<String, Object> item = (Map<String, Object>) obj;
+                    Map<String, Object> menuServiceItemRenderer = Util.getJSONMap(item, "menuServiceItemRenderer");
+                    if (menuServiceItemRenderer != null) {
+                        String iconType = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "icon"), "iconType");
+                        if(iconType != null) {
+                            switch (iconType) {
+                                case "KEEP": // pin
+                                    chatItem.pinToTopParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "liveChatActionEndpoint"), "params");
+                                    break;
+                                case "DELETE": // delete
+                                    chatItem.chatDeleteParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
+                                    break;
+                                case "HOURGLASS": // timeout
+                                    chatItem.timeBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
+                                    break;
+                                case "REMOVE_CIRCLE": // ban
+                                    chatItem.userBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
+                                    break;
+                                case "ADD_CIRCLE": // unban
+                                    chatItem.userUnbanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
+                                    break;
+                                case "FLAG": // Report
+                                case "ADD_MODERATOR": //Set author as moderator
+                                case "REMOVE_MODERATOR": //Set author as normal
+                                default:
+                                    break;
+                            }
+                        }
                     }
                 }
             }

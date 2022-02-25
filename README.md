@@ -304,7 +304,7 @@ You can send a message using ```YouTubeLiveChat#sendMessage()```. This function 
 chat.sendMessage("Message that you want to send");
 ```
 
-## Delete message (YoutubeLiveChat 1.x or later)
+## Delete message (YoutubeLiveChat 1.4 or later)
 You can delete a message using ```ChatItem#delete()```. This function needs user data. User must be either the author of the message, moderator or owner to perform this action.
 ```Java
 chatItem.delete();
@@ -312,27 +312,27 @@ chatItem.delete();
 
 ## Chat Moderation
 
-### Timeout the message author (YoutubeLiveChat 1.x or later)
+### Timeout the message author (YoutubeLiveChat 1.4 or later)
 You can timeout the author of the message for 300 seconds using ```ChatItem#timeoutAuthor()```. This function needs user data. User must be either moderator or owner to perform this action.
 ```Java
 chatItem.timeoutAuthor();
 ```
 
-### Ban the message author (YoutubeLiveChat 1.x or later)
+### Ban the message author (YoutubeLiveChat 1.4 or later)
 You can ban the author of the message from your channel permanently using ```ChatItem#banAuthor()```. This function needs user data. User must be either moderator or owner to perform this action.
 Always be cautious when you use this method. It is recommended to store banned ChatItems so that you can unban later.
 ```Java
 chatItem.banAuthor();
 ```
 
-### Unban the message author (YoutubeLiveChat 1.x or later)
+### Unban the message author (YoutubeLiveChat 1.4 or later)
 You can unban the author of the message who was permanently banned from your channel using ```ChatItem#unbanAuthor()```. This function needs user data. User must be either moderator or owner to perform this action.
 It is recommended to store banned ChatItems when you ban user, so that you can unban later.
 ```Java
 chatItem.unbanAuthor();
 ```
 
-### Pin message as banner (YoutubeLiveChat 1.x or later)
+### Pin message as banner (YoutubeLiveChat 1.4 or later)
 You can pin a message at the top banner in live chat using ```ChatItem#pinAsBanner()```. This function needs user data. User must be either moderator or owner to perform this action.
 ```Java
 chatItem.pinAsBanner();

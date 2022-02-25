@@ -17,9 +17,12 @@ public class YouTubeLiveChat {
      */
     public static String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36,gzip(gfe)";
 
-    private static final String liveChatApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key=";
-    private static final String liveChatReplayApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat_replay?key=";
-    private static final String liveChatSendMessageApi = "https://www.youtube.com/youtubei/v1/live_chat/send_message?key=";
+    private static final String liveChatApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key="; // view live chat
+    private static final String liveChatReplayApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat_replay?key="; // view chat replay
+    private static final String liveChatSendMessageApi = "https://www.youtube.com/youtubei/v1/live_chat/send_message?key="; // send chat
+    private static final String liveChatContextMenuApi = "https://www.youtube.com/youtubei/v1/live_chat/get_item_context_menu?key="; // get chat item menu
+    private static final String liveChatModerateApi = "https://studio.youtube.com/youtubei/v1/live_chat/moderate?key="; // moderation (delete, ban, unban)
+    private static final String liveChatActionApi = "https://studio.youtube.com/youtubei/v1/live_chat/live_chat_action?key="; // tools (pin)
 
     private String videoId;
     private String channelId;
@@ -39,7 +42,7 @@ public class YouTubeLiveChat {
     private int commentCounter;
     private String clientMessageId;
     private String params;
-    private String SAPISID, HSID, SSID, APISID, SID;
+    private String SAPISID, HSID, SSID, APISID, SID, LOGIN_INFO; // LOGIN_INFO to select channel
 
     private MessageDigest sha1;
 
@@ -210,7 +213,7 @@ public class YouTubeLiveChat {
                 }
             }
         } catch (IOException exception) {
-            throw new IOException("Can't get youtube live chat!");
+            throw new IOException("Can't get youtube live chat!", exception);
         }
     }
 
@@ -240,10 +243,129 @@ public class YouTubeLiveChat {
             }
             Util.sendHttpRequestWithJson(liveChatSendMessageApi + this.apiKey, this.getPayloadToSendMessage(message), this.getHeader());
         } catch (IOException exception) {
-            throw new IOException("Couldn't send a message!");
+            throw new IOException("Couldn't send a message!", exception);
         }
     }
 
+    protected void deleteMessage(ChatItem chatItem) throws IOException, IllegalStateException {
+        if (this.isReplay) {
+            throw new IllegalStateException("This live is replay! You can delete a chat if this live isn't replay.");
+        }
+
+        try {
+            if (this.datasyncId == null) {
+                throw new IOException("datasyncId is null! Please call reset() or set user data.");
+            }
+            if (chatItem.chatDeleteParams == null) {
+                if (!this.hasAllIDs()) {
+                    throw new IllegalStateException("You need to set user data using setUserData()");
+                }
+                getContextMenu(chatItem);
+                if(chatItem.chatDeleteParams == null) {
+                    throw new IllegalStateException("chatDeleteParams is null! Check if you have permission or use setUserData() first.");
+                }
+            }
+            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.chatDeleteParams), this.getHeader());
+        } catch (IOException exception) {
+            throw new IOException("Couldn't delete chat!", exception);
+        }
+    }
+
+    protected void banAuthorTemporarily(ChatItem chatItem) throws IOException, IllegalStateException {
+        if (this.isReplay) {
+            throw new IllegalStateException("This live is replay! You can ban a user if this live isn't replay.");
+        }
+
+        try {
+            if (this.datasyncId == null) {
+                throw new IOException("datasyncId is null! Please call reset() or set user data.");
+            }
+            if (chatItem.timeBanParams == null) {
+                if (!this.hasAllIDs()) {
+                    throw new IllegalStateException("You need to set user data using setUserData()");
+                }
+                getContextMenu(chatItem);
+                if(chatItem.timeBanParams == null) {
+                    throw new IllegalStateException("timeBanParams is null! Check if you have permission or use setUserData() first.");
+                }
+            }
+            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.timeBanParams), this.getHeader());
+        } catch (IOException exception) {
+            throw new IOException("Couldn't ban user!", exception);
+        }
+    }
+
+    public void banUserPermanently(ChatItem chatItem) throws IOException, IllegalStateException {
+        if (this.isReplay) {
+            throw new IllegalStateException("This live is replay! You can ban a user if this live isn't replay.");
+        }
+        if (!this.hasAllIDs()) {
+            throw new IllegalStateException("You need to set user data using setUserData()");
+        }
+
+        try {
+            if (this.datasyncId == null) {
+                throw new IOException("datasyncId is null! Please call reset() or set user data.");
+            }
+            if (chatItem.userBanParams == null) {
+                getContextMenu(chatItem);
+                if(chatItem.userBanParams == null) {
+                    throw new IllegalStateException("userBanParams is null! Check if you have permission or use setUserData() first.");
+                }
+            }
+            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.userBanParams), this.getHeader());
+        } catch (IOException exception) {
+            throw new IOException("Couldn't ban user!", exception);
+        }
+    }
+
+    public void unbanUser(ChatItem chatItem) throws IOException, IllegalStateException {
+        if (this.isReplay) {
+            throw new IllegalStateException("This live is replay! You can ban a user if this live isn't replay.");
+        }
+        if (!this.hasAllIDs()) {
+            throw new IllegalStateException("You need to set user data using setUserData()");
+        }
+
+        try {
+            if (this.datasyncId == null) {
+                throw new IOException("datasyncId is null! Please call reset() or set user data.");
+            }
+            if (chatItem.userUnbanParams == null) {
+                getContextMenu(chatItem);
+                if(chatItem.userUnbanParams == null) {
+                    throw new IllegalStateException("userUnbanParams is null! Check if you have permission or use setUserData() first.");
+                }
+            }
+            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.userUnbanParams), this.getHeader());
+        } catch (IOException exception) {
+            throw new IOException("Couldn't unban user!", exception);
+        }
+    }
+
+    public void pinMessage(ChatItem chatItem) throws IOException, IllegalStateException {
+        if (this.isReplay) {
+            throw new IllegalStateException("This live is replay! You can pin a chat if this live isn't replay.");
+        }
+
+        try {
+            if (this.datasyncId == null) {
+                throw new IOException("datasyncId is null! Please call reset() or set user data.");
+            }
+            if (chatItem.pinToTopParams == null) {
+                if (!this.hasAllIDs()) {
+                    throw new IllegalStateException("You need to set user data using setUserData()");
+                }
+                getContextMenu(chatItem);
+                if(chatItem.pinToTopParams == null) {
+                    throw new IllegalStateException("pinToTopParams is null! Check if you have permission or use setUserData() first.");
+                }
+            }
+            Util.sendHttpRequestWithJson(liveChatActionApi + this.apiKey, this.getPayloadClient(chatItem.pinToTopParams), this.getHeader());
+        } catch (IOException exception) {
+            throw new IOException("Couldn't pin chat!", exception);
+        }
+    }
 
     /**
      * Language used to get chat
@@ -263,40 +385,80 @@ public class YouTubeLiveChat {
     }
 
     /**
-     * Set user data
-     * The IDs are written in your browser's Cookie
+     * Set user data.
+     * The IDs are written in your browser's Cookie.
      *
-     * @param ids The Map that contains these keys: SAPISID, HSID, SSID, APISID and SID
+     * @param ids The Map that contains these keys: SAPISID, HSID, SSID, APISID, SID, and LOGIN_INFO
      */
     public void setUserData(Map<String, String> ids) {
         if (!ids.containsKey("SAPISID") || !ids.containsKey("HSID") || !ids.containsKey("SSID") || !ids.containsKey("APISID") || !ids.containsKey("SID"))
             throw new IllegalArgumentException("The map didn't contain any ids.");
 
-        this.setUserData(ids.get("SAPISID"), ids.get("HSID"), ids.get("SSID"), ids.get("APISID"), ids.get("SID"));
+        this.setUserData(ids.get("SAPISID"), ids.get("HSID"), ids.get("SSID"), ids.get("APISID"), ids.get("SID"), ids.get("LOGIN_INFO"));
     }
 
     /**
-     * Set user data
-     * The IDs are written in your browser's Cookie
+     * Set user data.
+     * The IDs are written in your browser's Cookie.
      *
-     * @param SAPISID SAPIID
+     * @param SAPISID SAPISID
      * @param HSID    HSID
      * @param SSID    SSID
      * @param APISID  APISID
      * @param SID     SID
+     * @deprecated Add 'LOGIN_INFO' to select channel. {@link #setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID, String LOGIN_INFO)}
      */
+    @Deprecated
     public void setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID) {
+        this.setUserData(SAPISID, HSID, SSID, APISID, SID,null);
+    }
+
+    /**
+     * Set user data.
+     * The IDs are written in your browser's Cookie.
+     *
+     * @param SAPISID    SAPISID
+     * @param HSID       HSID
+     * @param SSID       SSID
+     * @param APISID     APISID
+     * @param SID        SID
+     * @param LOGIN_INFO LOGIN_INFO
+     */
+    public void setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID, String LOGIN_INFO) {
         this.SAPISID = SAPISID;
         this.HSID = HSID;
         this.SSID = SSID;
         this.APISID = APISID;
         this.SID = SID;
+        this.LOGIN_INFO = LOGIN_INFO;
 
         try {
             this.reset();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Set user data.
+     * Cookies can be found in Chrome Devtools(F12) 'Network' tab, 'get_live_chat' request.
+     * Any other cookies are ignored.
+     *
+     * @param cookies string that contains these cookies: SAPISID, HSID, SSID, APISID, SID, and LOGIN_INFO. format: "APISID:###; HSID:###; SSID: ..."
+     */
+    public void setUserData(String cookies) {
+        String all = String.format(";%s;", cookies);
+        String[] keys = new String[]{"SAPISID","HSID","SSID","APISID","SID","LOGIN_INFO"};
+        String[] values = new String[6];
+
+        for(int i=0;i<6;i++) {
+            Pattern pattern = Pattern.compile("[^\\w]" + keys[i] + "=([^;]*);");
+            Matcher matcher = pattern.matcher(all);
+            if(matcher.find()) values[i] = matcher.group(1);
+            else throw new IllegalArgumentException("Cannot find cookie " + keys[i]);
+        }
+
+        setUserData(values[0], values[1], values[2], values[3], values[4], values[5]);
     }
 
     private void parseActions(List<Object> json) {
@@ -317,7 +479,7 @@ public class YouTubeLiveChat {
                 ChatItem chatItem = null;
                 Map<String, Object> item = Util.getJSONMap(addChatItemAction, "item");
                 if (item != null) {
-                    chatItem = new ChatItem();
+                    chatItem = new ChatItem(this);
                     this.parseChatItem(chatItem, item);
                 }
                 if (chatItem != null && chatItem.id != null) {
@@ -327,7 +489,7 @@ public class YouTubeLiveChat {
             //Pinned message
             Map<String, Object> contents = Util.getJSONMap(actions, "addBannerToLiveChatCommand", "bannerRenderer", "liveChatBannerRenderer", "contents");
             if (contents != null) {
-                ChatItem chatItem = new ChatItem();
+                ChatItem chatItem = new ChatItem(this);
                 this.parseChatItem(chatItem, contents);
                 this.bannerItem = chatItem;
             }
@@ -398,6 +560,11 @@ public class YouTubeLiveChat {
                         }
                     }
                 }
+            }
+            // Context Menu Params
+            String contextMenuParams = Util.getJSONValueString(Util.getJSONMap(liveChatTextMessageRenderer,"contextMenuEndpoint","liveChatItemContextMenuEndpoint"),"params");
+            if(contextMenuParams != null) {
+                chatItem.contextMenuParams = contextMenuParams;
             }
         }
         if (action.containsKey("liveChatViewerEngagementMessageRenderer")) {
@@ -487,7 +654,7 @@ public class YouTubeLiveChat {
                         }
                     }
                     emoji.shortcuts = shortcuts;
-                    text.append(" ").append(shortcuts.get(0)).append(" ");
+                    if(!shortcuts.isEmpty()) text.append(" ").append(shortcuts.get(0)).append(" ");
                     List<Object> searchTermsList = Util.getJSONList(emojiMap, "searchTerms");
                     ArrayList<String> searchTerms = new ArrayList<>();
                     if (searchTermsList != null) {
@@ -699,6 +866,25 @@ public class YouTubeLiveChat {
         return Util.toJSON(json);
     }
 
+    private String getPayloadClient(String params) {
+        Map<String, Object> json = new LinkedHashMap<>();
+        Map<String, Object> context = new LinkedHashMap<>();
+        Map<String, Object> user = new LinkedHashMap<>();
+        Map<String, Object> client = new LinkedHashMap<>();
+        if (this.commentCounter >= Integer.MAX_VALUE - 1) {
+            this.commentCounter = 0;
+        }
+        json.put("context", context);
+        context.put("client", client);
+        client.put("clientName", "WEB");
+        client.put("clientVersion", this.getClientVersion());
+        context.put("user", user);
+        user.put("onBehalfOfUser", datasyncId);
+        json.put("params", params);
+
+        return Util.toJSON(json);
+    }
+
     private Map<String, String> getHeader() {
         HashMap<String, String> header = new HashMap<>();
         if (!this.hasAllIDs()) return header;
@@ -710,9 +896,52 @@ public class YouTubeLiveChat {
         header.put("Authorization", "SAPISIDHASH " + time + "_" + String.format("%040x", new BigInteger(1, sha1_result)));
         header.put("X-Origin", origin);
         header.put("Origin", origin);
-        header.put("Cookie", String.format("SAPISID=%s; HSID=%s; SSID=%s; APISID=%s; SID=%s;", this.SAPISID, this.HSID, this.SSID, this.APISID, this.SID));
-
+        header.put("Cookie", String.format("SAPISID=%s; HSID=%s; SSID=%s; APISID=%s; SID=%s;%s", this.SAPISID, this.HSID, this.SSID, this.APISID, this.SID,
+                this.LOGIN_INFO != null ? String.format(" LOGIN_INFO=%s;", this.LOGIN_INFO) : ""));
         return header;
+    }
+
+    public void getContextMenu(ChatItem chatItem) {
+        try {
+            String rawJson = Util.getPageContentWithJson(liveChatContextMenuApi + apiKey + "&params=" + chatItem.contextMenuParams, getPayloadToSendMessage(""), getHeader());
+            Map<String, Object> json = Util.toJSON(rawJson);
+            List<Object> items = Util.getJSONList(json,"items","liveChatItemContextMenuSupportedRenderers","menuRenderer");
+            if(items != null) {
+                for(Object obj : items) {
+                    Map<String, Object> item = (Map<String, Object>) obj;
+                    Map<String, Object> menuServiceItemRenderer = Util.getJSONMap(item, "menuServiceItemRenderer");
+                    if (menuServiceItemRenderer != null) {
+                        String iconType = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "icon"), "iconType");
+                        if(iconType != null) {
+                            switch (iconType) {
+                                case "KEEP": // pin
+                                    chatItem.pinToTopParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "liveChatActionEndpoint"), "params");
+                                    break;
+                                case "DELETE": // delete
+                                    chatItem.chatDeleteParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
+                                    break;
+                                case "HOURGLASS": // timeout
+                                    chatItem.timeBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
+                                    break;
+                                case "REMOVE_CIRCLE": // ban
+                                    chatItem.userBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
+                                    break;
+                                case "ADD_CIRCLE": // unban
+                                    chatItem.userUnbanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
+                                    break;
+                                case "FLAG": // Report
+                                case "ADD_MODERATOR": //Set author as moderator
+                                case "REMOVE_MODERATOR": //Set author as normal
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private MessageDigest getSHA1Engine() {

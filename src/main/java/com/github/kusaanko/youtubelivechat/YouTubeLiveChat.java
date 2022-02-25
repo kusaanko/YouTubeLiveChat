@@ -230,7 +230,7 @@ public class YouTubeLiveChat {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can send a message if this live isn't replay.");
         }
-        if (!this.hasAllIDs()) {
+        if (this.isIDsMissing()) {
             throw new IllegalStateException("You need to set user data using setUserData()");
         }
 
@@ -257,7 +257,7 @@ public class YouTubeLiveChat {
                 throw new IOException("datasyncId is null! Please call reset() or set user data.");
             }
             if (chatItem.chatDeleteParams == null) {
-                if (!this.hasAllIDs()) {
+                if (this.isIDsMissing()) {
                     throw new IllegalStateException("You need to set user data using setUserData()");
                 }
                 getContextMenu(chatItem);
@@ -281,7 +281,7 @@ public class YouTubeLiveChat {
                 throw new IOException("datasyncId is null! Please call reset() or set user data.");
             }
             if (chatItem.timeBanParams == null) {
-                if (!this.hasAllIDs()) {
+                if (this.isIDsMissing()) {
                     throw new IllegalStateException("You need to set user data using setUserData()");
                 }
                 getContextMenu(chatItem);
@@ -299,7 +299,7 @@ public class YouTubeLiveChat {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can ban a user if this live isn't replay.");
         }
-        if (!this.hasAllIDs()) {
+        if (this.isIDsMissing()) {
             throw new IllegalStateException("You need to set user data using setUserData()");
         }
 
@@ -323,7 +323,7 @@ public class YouTubeLiveChat {
         if (this.isReplay) {
             throw new IllegalStateException("This live is replay! You can ban a user if this live isn't replay.");
         }
-        if (!this.hasAllIDs()) {
+        if (this.isIDsMissing()) {
             throw new IllegalStateException("You need to set user data using setUserData()");
         }
 
@@ -353,7 +353,7 @@ public class YouTubeLiveChat {
                 throw new IOException("datasyncId is null! Please call reset() or set user data.");
             }
             if (chatItem.pinToTopParams == null) {
-                if (!this.hasAllIDs()) {
+                if (this.isIDsMissing()) {
                     throw new IllegalStateException("You need to set user data using setUserData()");
                 }
                 getContextMenu(chatItem);
@@ -887,7 +887,7 @@ public class YouTubeLiveChat {
 
     private Map<String, String> getHeader() {
         HashMap<String, String> header = new HashMap<>();
-        if (!this.hasAllIDs()) return header;
+        if (this.isIDsMissing()) return header;
         String time = System.currentTimeMillis() / 1000 + "";
         String origin = "https://www.youtube.com";
         String hash = time + " " + this.SAPISID + " " + origin;
@@ -1034,7 +1034,7 @@ public class YouTubeLiveChat {
         throw new IllegalArgumentException(url);
     }
 
-    private boolean hasAllIDs() {
-        return this.SAPISID != null && this.HSID != null && this.SSID != null && this.APISID != null && this.SID != null;
+    private boolean isIDsMissing() {
+        return this.SAPISID == null || this.HSID == null || this.SSID == null || this.APISID == null || this.SID == null;
     }
 }

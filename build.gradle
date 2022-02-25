@@ -1,0 +1,47 @@
+
+plugins {
+    id 'java'
+    id 'maven'
+}
+
+group 'com.github.kusaanko'
+version '1.3.3'
+
+repositories {
+    mavenCentral()
+}
+
+javadoc {
+    options.charSet = 'UTF-8'
+    options.encoding = 'UTF-8'
+}
+tasks.withType(AbstractCompile) each { it.options.encoding = 'UTF-8' }
+
+ext {
+    mavenRepository = 'C:\\Users\\kusaanko\\Documents\\GitHub\\maven'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri(mavenRepository))
+        }
+    }
+}
+
+task sourceJar(type : Jar) {
+    from sourceSets.main.allJava
+    classifier('sources')
+    extension('jar')
+}
+
+task javadocJar(type : Jar, dependsOn : javadoc) {
+    from javadoc.destinationDir
+    classifier('javadoc')
+    extension('jar')
+}
+
+artifacts {
+    archives sourceJar
+    archives javadocJar
+}

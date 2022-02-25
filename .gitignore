@@ -1,9 +1,4 @@
 src/test
 /bin/
-.classpath
-.project
-.idea
-YouTubeLiveChat.iml
 out
-META-INF
 build

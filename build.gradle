@@ -18,7 +18,7 @@ javadoc {
 tasks.withType(AbstractCompile) each { it.options.encoding = 'UTF-8' }
 
 ext {
-    mavenRepository = 'C:\\Users\\kusaanko\\Documents\\GitHub\\maven'
+    mavenRepository = '..\\maven'
 }
 
 uploadArchives {

@@ -1,4 +1,5 @@
 src/test
+.gradle/
 /bin/
 out
 build

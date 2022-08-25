@@ -1,15 +1,13 @@
 package com.github.kusaanko.youtubelivechat;
 
+import com.google.gson.JsonElement;
+
 import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class Util {
@@ -424,12 +422,39 @@ public class Util {
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
             String s;
             StringBuilder str = new StringBuilder();
-            while((s = reader.readLine()) != null) {
+            while ((s = reader.readLine()) != null) {
                 str.append(s);
             }
             connection.disconnect();
-            throw new IOException(str.toString(),e);
+            throw new IOException(str.toString(), e);
         }
+    }
+
+    public static String sendGETHttpRequest(String url, Map<String, String> header) throws IOException {
+        URL obj = new URL(url);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        con.setRequestMethod("GET");
+        con.setRequestProperty("User-Agent", YouTubeLiveChat.userAgent);
+        putRequestHeader(header);
+        for (String key : header.keySet()) {
+            con.setRequestProperty(key, header.get(key));
+        }
+        StringBuilder response = new StringBuilder();
+        try {
+            int responseCode = con.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                BufferedReader in = new BufferedReader(new InputStreamReader(
+                        con.getInputStream()));
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+            }
+        } catch (IOException exception) {
+            throw new IOException("Error during http request ", exception);
+        }
+        return response.toString();
     }
 
     private static void putRequestHeader(Map<String, String> header) {
@@ -447,5 +472,50 @@ public class Util {
         }
 
         return sb.toString();
+    }
+
+    public static JsonElement searchJsonElementByKey(String key, JsonElement jsonElement) {
+
+        JsonElement value = null;
+
+        // If input is an array, iterate through each element
+        if (jsonElement.isJsonArray()) {
+            for (JsonElement jsonElement1 : jsonElement.getAsJsonArray()) {
+                value = searchJsonElementByKey(key, jsonElement1);
+                if (value != null) {
+                    return value;
+                }
+            }
+        } else {
+            // If input is object, iterate through the keys
+            if (jsonElement.isJsonObject()) {
+                Set<Map.Entry<String, JsonElement>> entrySet = jsonElement
+                        .getAsJsonObject().entrySet();
+                for (Map.Entry<String, JsonElement> entry : entrySet) {
+
+                    // If key corresponds to the
+                    String key1 = entry.getKey();
+                    if (key1.equals(key)) {
+                        value = entry.getValue();
+                        return value;
+                    }
+
+                    // Use the entry as input, recursively
+                    value = searchJsonElementByKey(key, entry.getValue());
+                    if (value != null) {
+                        return value;
+                    }
+                }
+            }
+
+            // If input is element, check whether it corresponds to the key
+            else {
+                if (jsonElement.toString().equals(key)) {
+                    value = jsonElement;
+                    return value;
+                }
+            }
+        }
+        return value;
     }
 }

@@ -1,5 +1,9 @@
 package com.github.kusaanko.youtubelivechat;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -23,6 +27,7 @@ public class YouTubeLiveChat {
     private static final String liveChatContextMenuApi = "https://www.youtube.com/youtubei/v1/live_chat/get_item_context_menu?key="; // get chat item menu
     private static final String liveChatModerateApi = "https://studio.youtube.com/youtubei/v1/live_chat/moderate?key="; // moderation (delete, ban, unban)
     private static final String liveChatActionApi = "https://studio.youtube.com/youtubei/v1/live_chat/live_chat_action?key="; // tools (pin)
+    private static final String liveStreamInfoApi = "https://www.youtube.com/watch?v="; // stream info
 
     private String videoId;
     private String channelId;
@@ -45,6 +50,7 @@ public class YouTubeLiveChat {
     private String SAPISID, HSID, SSID, APISID, SID, LOGIN_INFO; // LOGIN_INFO to select channel
 
     private MessageDigest sha1;
+    private Gson gson;
 
     /**
      * Initialize YouTubeLiveChat
@@ -64,6 +70,7 @@ public class YouTubeLiveChat {
         this.locale = Locale.US;
         this.commentCounter = 0;
         this.clientMessageId = Util.generateClientMessageId();
+        this.gson = new Gson();
         try {
             this.getInitialData(id, type);
         } catch (IOException exception) {
@@ -261,7 +268,7 @@ public class YouTubeLiveChat {
                     throw new IllegalStateException("You need to set user data using setUserData()");
                 }
                 getContextMenu(chatItem);
-                if(chatItem.chatDeleteParams == null) {
+                if (chatItem.chatDeleteParams == null) {
                     throw new IllegalStateException("chatDeleteParams is null! Check if you have permission or use setUserData() first.");
                 }
             }
@@ -285,7 +292,7 @@ public class YouTubeLiveChat {
                     throw new IllegalStateException("You need to set user data using setUserData()");
                 }
                 getContextMenu(chatItem);
-                if(chatItem.timeBanParams == null) {
+                if (chatItem.timeBanParams == null) {
                     throw new IllegalStateException("timeBanParams is null! Check if you have permission or use setUserData() first.");
                 }
             }
@@ -309,7 +316,7 @@ public class YouTubeLiveChat {
             }
             if (chatItem.userBanParams == null) {
                 getContextMenu(chatItem);
-                if(chatItem.userBanParams == null) {
+                if (chatItem.userBanParams == null) {
                     throw new IllegalStateException("userBanParams is null! Check if you have permission or use setUserData() first.");
                 }
             }
@@ -333,7 +340,7 @@ public class YouTubeLiveChat {
             }
             if (chatItem.userUnbanParams == null) {
                 getContextMenu(chatItem);
-                if(chatItem.userUnbanParams == null) {
+                if (chatItem.userUnbanParams == null) {
                     throw new IllegalStateException("userUnbanParams is null! Check if you have permission or use setUserData() first.");
                 }
             }
@@ -357,7 +364,7 @@ public class YouTubeLiveChat {
                     throw new IllegalStateException("You need to set user data using setUserData()");
                 }
                 getContextMenu(chatItem);
-                if(chatItem.pinToTopParams == null) {
+                if (chatItem.pinToTopParams == null) {
                     throw new IllegalStateException("pinToTopParams is null! Check if you have permission or use setUserData() first.");
                 }
             }
@@ -410,7 +417,7 @@ public class YouTubeLiveChat {
      */
     @Deprecated
     public void setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID) {
-        this.setUserData(SAPISID, HSID, SSID, APISID, SID,null);
+        this.setUserData(SAPISID, HSID, SSID, APISID, SID, null);
     }
 
     /**
@@ -448,13 +455,13 @@ public class YouTubeLiveChat {
      */
     public void setUserData(String cookies) {
         String all = String.format(";%s;", cookies);
-        String[] keys = new String[]{"SAPISID","HSID","SSID","APISID","SID","LOGIN_INFO"};
+        String[] keys = new String[]{"SAPISID", "HSID", "SSID", "APISID", "SID", "LOGIN_INFO"};
         String[] values = new String[6];
 
-        for(int i=0;i<6;i++) {
+        for (int i = 0; i < 6; i++) {
             Pattern pattern = Pattern.compile("[^\\w]" + keys[i] + "=([^;]*);");
             Matcher matcher = pattern.matcher(all);
-            if(matcher.find()) values[i] = matcher.group(1);
+            if (matcher.find()) values[i] = matcher.group(1);
             else throw new IllegalArgumentException("Cannot find cookie " + keys[i]);
         }
 
@@ -562,8 +569,8 @@ public class YouTubeLiveChat {
                 }
             }
             // Context Menu Params
-            String contextMenuParams = Util.getJSONValueString(Util.getJSONMap(liveChatTextMessageRenderer,"contextMenuEndpoint","liveChatItemContextMenuEndpoint"),"params");
-            if(contextMenuParams != null) {
+            String contextMenuParams = Util.getJSONValueString(Util.getJSONMap(liveChatTextMessageRenderer, "contextMenuEndpoint", "liveChatItemContextMenuEndpoint"), "params");
+            if (contextMenuParams != null) {
                 chatItem.contextMenuParams = contextMenuParams;
             }
         }
@@ -654,7 +661,7 @@ public class YouTubeLiveChat {
                         }
                     }
                     emoji.shortcuts = shortcuts;
-                    if(!shortcuts.isEmpty()) text.append(" ").append(shortcuts.get(0)).append(" ");
+                    if (!shortcuts.isEmpty()) text.append(" ").append(shortcuts.get(0)).append(" ");
                     List<Object> searchTermsList = Util.getJSONList(emojiMap, "searchTerms");
                     ArrayList<String> searchTerms = new ArrayList<>();
                     if (searchTermsList != null) {
@@ -905,14 +912,14 @@ public class YouTubeLiveChat {
         try {
             String rawJson = Util.getPageContentWithJson(liveChatContextMenuApi + apiKey + "&params=" + chatItem.contextMenuParams, getPayloadToSendMessage(""), getHeader());
             Map<String, Object> json = Util.toJSON(rawJson);
-            List<Object> items = Util.getJSONList(json,"items","liveChatItemContextMenuSupportedRenderers","menuRenderer");
-            if(items != null) {
-                for(Object obj : items) {
+            List<Object> items = Util.getJSONList(json, "items", "liveChatItemContextMenuSupportedRenderers", "menuRenderer");
+            if (items != null) {
+                for (Object obj : items) {
                     Map<String, Object> item = (Map<String, Object>) obj;
                     Map<String, Object> menuServiceItemRenderer = Util.getJSONMap(item, "menuServiceItemRenderer");
                     if (menuServiceItemRenderer != null) {
                         String iconType = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "icon"), "iconType");
-                        if(iconType != null) {
+                        if (iconType != null) {
                             switch (iconType) {
                                 case "KEEP": // pin
                                     chatItem.pinToTopParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "liveChatActionEndpoint"), "params");
@@ -1036,5 +1043,25 @@ public class YouTubeLiveChat {
 
     private boolean isIDsMissing() {
         return this.SAPISID == null || this.HSID == null || this.SSID == null || this.APISID == null || this.SID == null;
+    }
+
+    /**
+     * Get broadcast info
+     *
+     * @return LiveBroadcastDetails obj
+     */
+    public LiveBroadcastDetails getBroadcastInfo() throws IOException {
+        try {
+            String url = liveStreamInfoApi + this.videoId + "?hl=en&pbj=1";
+            HashMap<String, String> header = new HashMap<>();
+            header.put("x-youtube-client-name", "1");
+            header.put("x-youtube-client-version", getClientVersion());
+            String response = Util.sendGETHttpRequest(url, header);
+            JsonElement jsonElement = JsonParser.parseString(response).getAsJsonArray();
+            JsonElement liveBroadcastDetails = Util.searchJsonElementByKey("liveBroadcastDetails", jsonElement);
+            return gson.fromJson(liveBroadcastDetails, LiveBroadcastDetails.class);
+        } catch (IOException exception) {
+            throw new IOException("Couldn't get broadcast info!", exception);
+        }
     }
 }

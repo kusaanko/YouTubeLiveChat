@@ -1,5 +1,6 @@
 package com.github.kusaanko.youtubelivechat;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
 import java.io.*;
@@ -11,11 +12,10 @@ import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class Util {
+    private static Gson gson;
 
-    public static Map<String, Object> toJSON(String json) {
-        LinkedHashMap<String, Object> js = new LinkedHashMap<>();
-        toJSON(json, js, 0);
-        return js;
+    static {
+        gson = new Gson();
     }
 
     public static String toJSON(Map<String, Object> json) {
@@ -43,233 +43,12 @@ public class Util {
         return js.substring(0, js.length() - 2) + "}";
     }
 
-    public static int toJSON(String json, Map<String, Object> result, int pos) {
-        if (!json.substring(pos).startsWith("{")) {
+    public static Map<String, Object> toJSON(String json) {
+        if (!json.startsWith("{")) {
             throw new IllegalArgumentException("This is not json(map)!");
         }
-        StringBuilder key = new StringBuilder();
-        StringBuilder str = new StringBuilder();
-        StringBuilder unicode = new StringBuilder();
-        boolean keyStart = false;
-        boolean valueStart = false;
-        boolean strStart = false;
-        boolean numStart = false;
-        boolean strEscape = false;
-        char[] jsonArray = json.toCharArray();
-        int unicodePos = 0;
-        pos++;
-        for (; pos < json.length(); pos++) {
-            char c = jsonArray[pos];
-            if (unicodePos > 0) {
-                if (unicodePos > 2) {
-                    unicode.append(c);
-                }
-                unicodePos++;
-                if (unicodePos == 5) {
-                    str.append(new String(new BigInteger(unicode.toString(), 16).toByteArray()));
-                    unicodePos = 0;
-                }
-            } else if (keyStart) {
-                if (c == '\\') {
-                    if (strEscape) {
-                        key.append(c);
-                        strEscape = false;
-                    } else {
-                        strEscape = true;
-                    }
-                } else if (c == '"') {
-                    if (strEscape) {
-                        key.append(c);
-                        strEscape = false;
-                    } else {
-                        keyStart = false;
-                        valueStart = true;
-                    }
-                } else if (strEscape) {
-                    if (c == 'u') {
-                        unicodePos = 1;
-                    } else if (c == 'n') {
-                        str.append("\n");
-                    }
-                    strEscape = false;
-                } else {
-                    key.append(c);
-                }
-                continue;
-            } else if (valueStart) {
-                if (strStart) {
-                    if (c == '\\') {
-                        if (strEscape) {
-                            str.append(c);
-                            strEscape = false;
-                        } else {
-                            strEscape = true;
-                        }
-                    } else if (c == '"') {
-                        if (strEscape) {
-                            str.append(c);
-                            strEscape = false;
-                        } else {
-                            result.put(key.toString(), str.toString());
-                            str = new StringBuilder();
-                            key = new StringBuilder();
-                            strStart = false;
-                            valueStart = false;
-                        }
-                    } else if (strEscape) {
-                        if (c == 'u') {
-                            unicodePos = 1;
-                        } else if (c == 'n') {
-                            str.append("\n");
-                        }
-                        strEscape = false;
-                    } else {
-                        str.append(c);
-                    }
-                    continue;
-                } else if (c == '"') {
-                    strStart = true;
-                } else if (c >= '0' && c <= '9' || c == '-') {
-                    numStart = true;
-                } else if (c == 't') {
-                    result.put(key.toString(), true);
-                    key = new StringBuilder();
-                    valueStart = false;
-                    pos += 3;
-                } else if (c == 'f') {
-                    result.put(key.toString(), false);
-                    key = new StringBuilder();
-                    valueStart = false;
-                    pos += 4;
-                } else if (c == '[') {
-                    ArrayList<Object> list = new ArrayList<>();
-                    pos = toJSON(json, list, pos);
-                    result.put(key.toString(), list);
-                    key = new StringBuilder();
-                    valueStart = false;
-                } else if (c == '{') {
-                    LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-                    pos = toJSON(json, map, pos);
-                    result.put(key.toString(), map);
-                    key = new StringBuilder();
-                    valueStart = false;
-                    continue;
-                }
-                if (numStart) {
-                    if ((c >= '0' && c <= '9' || c == '-') || c == '.') {
-                        str.append(c);
-                    } else {
-                        numStart = false;
-                        String n = str.toString();
-                        if (n.contains(".")) {
-                            result.put(key.toString(), Double.parseDouble(n));
-                        } else {
-                            result.put(key.toString(), Long.parseLong(n));
-                        }
-                        key = new StringBuilder();
-                        str = new StringBuilder();
-                        valueStart = false;
-                    }
-                }
-            } else if (c == '"') {
-                keyStart = true;
-            }
-            if (c == '}') {
-                break;
-            }
-        }
-        return pos;
-    }
-
-    public static int toJSON(String json, List<Object> result, int pos) {
-        if (!json.substring(pos).startsWith("[")) {
-            throw new IllegalArgumentException("This is not json(list)!");
-        }
-        StringBuilder str = new StringBuilder();
-        StringBuilder unicode = new StringBuilder();
-        boolean strStart = false;
-        boolean strEscape = false;
-        boolean numStart = false;
-        int unicodePos = 0;
-        char[] jsonArray = json.toCharArray();
-        pos++;
-        for (; pos < json.length(); pos++) {
-            char c = jsonArray[pos];
-            if (unicodePos > 0) {
-                if (unicodePos > 2) {
-                    unicode.append(c);
-                }
-                unicodePos++;
-                if (unicodePos == 5) {
-                    str.append(new String(new BigInteger(unicode.toString(), 16).toByteArray()));
-                    unicodePos = 0;
-                }
-            } else if (strStart) {
-                if (c == '\\') {
-                    if (strEscape) {
-                        str.append(c);
-                        strEscape = false;
-                    } else {
-                        strEscape = true;
-                    }
-                } else if (c == '\"') {
-                    if (!strEscape) {
-                        strStart = false;
-                        result.add(str.toString());
-                        str = new StringBuilder();
-                    } else {
-                        str.append(c);
-                    }
-                    strEscape = false;
-                } else if (strEscape) {
-                    if (c == 'u') {
-                        unicodePos = 1;
-                    } else if (c == 'n') {
-                        str.append("\n");
-                    }
-                    strEscape = false;
-                } else {
-                    str.append(c);
-                }
-                continue;
-            } else if (c == '\"') {
-                strStart = true;
-            } else if (c >= '0' && c <= '9' || c == '-') {
-                numStart = true;
-            } else if (c == 't') {
-                result.add(true);
-                pos += 3;
-            } else if (c == 'f') {
-                result.add(false);
-                pos += 4;
-            } else if (c == '[') {
-                ArrayList<Object> list = new ArrayList<>();
-                pos = toJSON(json, list, pos);
-                result.add(list);
-            } else if (c == '{') {
-                LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-                pos = toJSON(json, map, pos);
-                result.add(map);
-            }
-            if (numStart) {
-                if ((c >= '0' && c <= '9' || c == '-') || c == '.') {
-                    str.append(c);
-                } else {
-                    numStart = false;
-                    String n = str.toString();
-                    if (n.contains(".")) {
-                        result.add(Double.parseDouble(n));
-                    } else {
-                        result.add(Long.parseLong(n));
-                    }
-                    str = new StringBuilder();
-                }
-            }
-            if (c == ']') {
-                break;
-            }
-        }
-        return pos;
+        Map<String, Object> result = gson.fromJson(json, Map.class);
+        return result;
     }
 
     public static Map<String, Object> getJSONMap(Map<String, Object> json, String... keys) {
@@ -342,7 +121,7 @@ public class Util {
     public static long getJSONValueLong(Map<String, Object> json, String key) {
         Object value = getJSONValue(json, key);
         if (value != null) {
-            return (long) value;
+            return ((Double) value).longValue();
         }
         return 0;
     }

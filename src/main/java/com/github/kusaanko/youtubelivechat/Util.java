@@ -395,17 +395,25 @@ public class Util {
         writer.write(data);
         writer.close();
         connection.connect();
-        InputStream inputStream = connection.getInputStream();
-        byte[] buff = new byte[8192];
-        int len;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        while ((len = inputStream.read(buff)) != -1) {
-            baos.write(buff, 0, len);
+        try {
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                InputStream inputStream = connection.getInputStream();
+                byte[] buff = new byte[8192];
+                int len;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((len = inputStream.read(buff)) != -1) {
+                    baos.write(buff, 0, len);
+                }
+                inputStream.close();
+                String content = baos.toString(StandardCharsets.UTF_8.toString());
+                baos.close();
+                return content;
+            }
+        } catch (IOException exception) {
+            throw new IOException("Error during http request ", exception);
         }
-        inputStream.close();
-        String content = baos.toString(StandardCharsets.UTF_8.toString());
-        baos.close();
-        return content;
+        return null;
     }
 
     public static void sendHttpRequestWithJson(String url, String data, Map<String, String> header) throws IOException {

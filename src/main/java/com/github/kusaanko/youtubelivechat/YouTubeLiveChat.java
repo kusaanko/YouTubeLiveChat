@@ -803,7 +803,7 @@ public class YouTubeLiveChat {
                 }
             } else {
                 html = Util.getPageContent("https://www.youtube.com/live_chat?continuation=" + this.continuation + "", getHeader());
-                String initJson = html.substring(html.indexOf("window[\"ytInitialData\"] = ") + "window[\"ytInitialData\"] = ".length());
+                String initJson = Objects.requireNonNull(html).substring(html.indexOf("window[\"ytInitialData\"] = ") + "window[\"ytInitialData\"] = ".length());
                 initJson = initJson.substring(0, initJson.indexOf(";</script>"));
                 Map<String, Object> json = Util.toJSON(initJson);
                 Map<String, Object> sendLiveChatMessageEndpoint = Util.getJSONMap(json, "continuationContents", "liveChatContinuation", "actionPanel", "liveChatMessageInputRenderer", "sendButton", "buttonRenderer", "serviceEndpoint", "sendLiveChatMessageEndpoint");

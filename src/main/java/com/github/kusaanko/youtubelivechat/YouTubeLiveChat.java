@@ -50,7 +50,7 @@ public class YouTubeLiveChat {
     private String SAPISID, HSID, SSID, APISID, SID, LOGIN_INFO; // LOGIN_INFO to select channel
 
     private MessageDigest sha1;
-    private Gson gson;
+    private final Gson gson;
 
     /**
      * Initialize YouTubeLiveChat
@@ -752,14 +752,14 @@ public class YouTubeLiveChat {
             if (type == IdType.VIDEO) {
                 this.videoId = id;
                 html = Util.getPageContent("https://www.youtube.com/watch?v=" + id, getHeader());
-                Matcher channelIdMatcher = Pattern.compile("\"channelId\":\"([^\"]*)\",\"isOwnerViewing\"").matcher(html);
+                Matcher channelIdMatcher = Pattern.compile("\"channelId\":\"([^\"]*)\",\"isOwnerViewing\"").matcher(Objects.requireNonNull(html));
                 if (channelIdMatcher.find()) {
                     this.channelId = channelIdMatcher.group(1);
                 }
             } else if (type == IdType.CHANNEL) {
                 this.channelId = id;
                 html = Util.getPageContent("https://www.youtube.com/channel/" + id + "/live", getHeader());
-                Matcher videoIdMatcher = Pattern.compile("\"updatedMetadataEndpoint\":\\{\"videoId\":\"([^\"]*)").matcher(html);
+                Matcher videoIdMatcher = Pattern.compile("\"updatedMetadataEndpoint\":\\{\"videoId\":\"([^\"]*)").matcher(Objects.requireNonNull(html));
                 if (videoIdMatcher.find()) {
                     this.videoId = videoIdMatcher.group(1);
                 } else {
@@ -790,7 +790,7 @@ public class YouTubeLiveChat {
             }
             if (this.isReplay) {
                 html = Util.getPageContent("https://www.youtube.com/live_chat_replay?continuation=" + this.continuation + "", new HashMap<>());
-                String initJson = html.substring(html.indexOf("window[\"ytInitialData\"] = ") + "window[\"ytInitialData\"] = ".length());
+                String initJson = Objects.requireNonNull(html).substring(html.indexOf("window[\"ytInitialData\"] = ") + "window[\"ytInitialData\"] = ".length());
                 initJson = initJson.substring(0, initJson.indexOf(";</script>"));
                 Map<String, Object> json = Util.toJSON(initJson);
                 Map<String, Object> timedContinuationData = Util.getJSONMap(json, "continuationContents", "liveChatContinuation", "continuations", 0, "liveChatReplayContinuationData");
@@ -1057,10 +1057,10 @@ public class YouTubeLiveChat {
             header.put("x-youtube-client-name", "1");
             header.put("x-youtube-client-version", getClientVersion());
             String response = Util.getPageContent(url, header);
-            JsonElement jsonElement = JsonParser.parseString(response).getAsJsonArray();
+            JsonElement jsonElement = JsonParser.parseString(Objects.requireNonNull(response)).getAsJsonArray();
             JsonElement liveBroadcastDetails = Util.searchJsonElementByKey("liveBroadcastDetails", jsonElement);
             return gson.fromJson(liveBroadcastDetails, LiveBroadcastDetails.class);
-        } catch (IOException exception) {
+        } catch (IOException | NullPointerException exception) {
             throw new IOException("Couldn't get broadcast info!", exception);
         }
     }

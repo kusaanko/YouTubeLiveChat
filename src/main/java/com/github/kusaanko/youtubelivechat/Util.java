@@ -359,17 +359,25 @@ public class Util {
             connection.setRequestProperty(key, header.get(key));
         }
         connection.connect();
-        InputStream inputStream = connection.getInputStream();
-        byte[] buff = new byte[8192];
-        int len;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        while ((len = inputStream.read(buff)) != -1) {
-            baos.write(buff, 0, len);
+        try {
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                InputStream inputStream = connection.getInputStream();
+                byte[] buff = new byte[8192];
+                int len;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((len = inputStream.read(buff)) != -1) {
+                    baos.write(buff, 0, len);
+                }
+                inputStream.close();
+                String content = baos.toString(StandardCharsets.UTF_8.toString());
+                baos.close();
+                return content;
+            }
+        } catch (IOException exception) {
+            throw new IOException("Error during http request ", exception);
         }
-        inputStream.close();
-        String content = baos.toString(StandardCharsets.UTF_8.toString());
-        baos.close();
-        return content;
+        return null;
     }
 
     public static String getPageContentWithJson(String url, String data, Map<String, String> header) throws IOException {
@@ -428,33 +436,6 @@ public class Util {
             connection.disconnect();
             throw new IOException(str.toString(), e);
         }
-    }
-
-    public static String sendGETHttpRequest(String url, Map<String, String> header) throws IOException {
-        URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("User-Agent", YouTubeLiveChat.userAgent);
-        putRequestHeader(header);
-        for (String key : header.keySet()) {
-            con.setRequestProperty(key, header.get(key));
-        }
-        StringBuilder response = new StringBuilder();
-        try {
-            int responseCode = con.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) { // success
-                BufferedReader in = new BufferedReader(new InputStreamReader(
-                        con.getInputStream()));
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-                in.close();
-            }
-        } catch (IOException exception) {
-            throw new IOException("Error during http request ", exception);
-        }
-        return response.toString();
     }
 
     private static void putRequestHeader(Map<String, String> header) {

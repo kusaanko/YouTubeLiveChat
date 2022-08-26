@@ -1052,11 +1052,11 @@ public class YouTubeLiveChat {
      */
     public LiveBroadcastDetails getBroadcastInfo() throws IOException {
         try {
-            String url = liveStreamInfoApi + this.videoId + "?hl=en&pbj=1";
+            String url = liveStreamInfoApi + this.videoId + "&hl=en&pbj=1";
             HashMap<String, String> header = new HashMap<>();
             header.put("x-youtube-client-name", "1");
             header.put("x-youtube-client-version", getClientVersion());
-            String response = Util.sendGETHttpRequest(url, header);
+            String response = Util.getPageContent(url, header);
             JsonElement jsonElement = JsonParser.parseString(response).getAsJsonArray();
             JsonElement liveBroadcastDetails = Util.searchJsonElementByKey("liveBroadcastDetails", jsonElement);
             return gson.fromJson(liveBroadcastDetails, LiveBroadcastDetails.class);

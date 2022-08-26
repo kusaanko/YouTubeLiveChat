@@ -25,4 +25,13 @@ public class LiveBroadcastDetails {
     public String getEndTimestamp() {
         return endTimestamp;
     }
+
+    @Override
+    public String toString() {
+        return "LiveBroadcastDetails{" +
+                "isLiveNow=" + isLiveNow +
+                ", startTimestamp='" + startTimestamp + '\'' +
+                ", endTimestamp='" + endTimestamp + '\'' +
+                '}';
+    }
 }

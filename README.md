@@ -59,10 +59,19 @@ Download main and use.
 ```Java
 SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 YouTubeLiveChat chat = new YouTubeLiveChat("Aw5b1sa0w", true, IdType.VIDEO);
+int liveStatusCheckCycle = 0;
 while (true) {
     chat.update();
     for (ChatItem item : chat.getChatItems()) {
         System.out.println(format.format(new Date(item.getTimestamp() / 1000)) + " " + item.getType() + "[" + item.getAuthorName() + "]" + item.getAuthorType() + " " + item.getMessage());
+    }
+    liveStatusCheckCycle++;
+    if(liveStatusCheckCycle >= 10) {
+        // Calling this method frequently, cpu usage and network usage become higher because this method requests a http request.
+        if(chat.getBroadcastInfo().isLiveEnd) {
+            break;
+        }
+        liveStatusCheckCycle = 0;
     }
     try {
         Thread.sleep(1000);
@@ -343,7 +352,7 @@ chatItem.pinAsBanner();
 ## Get live broadcast information (YouTubeLiveChat 1.5 or later)
 You can mainly use this to check whether the live has ended.
 
-This information contains some live information(e.g. title, description, start time, end time, view count)
+This information contains some live information(e.g. start time, end time)
 
 ```Java
 live.getBroadcastInfo();

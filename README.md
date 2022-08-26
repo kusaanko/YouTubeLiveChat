@@ -10,6 +10,7 @@
  - Supports message, Super Chat, Super Stickers and member
  - Send a message to live chat (Developed by @yadokari1130 )
  - Delete message and moderate chat (Developed by @HURDOO )
+ - Get live broadcast information (Developed by @argen666 )
 
 
 # How to install
@@ -291,7 +292,7 @@ YoutubeLiveChat.setUserData("SAPISID", "HSID", "SSID", "APISID", "SID", "LOGIN_I
 // You can use Map (YoutubeLiveChat 1.3.2 or later)
 YoutubeLiveChat.setUserData(Map<String, String>);
 
-// You can also copy 'Cookies' header from browser request and paste here. (YoutubeLiveChat 1.x or later)
+// You can also copy 'Cookies' header from browser request and paste here. (YoutubeLiveChat 1.4 or later)
 // Format: "KEY1: VALUE1; KEY: VALUE2; ..."
 // Ignore other cookies that aren't needed (in below example, YSC will be ignored)
 YoutubeLiveChat.setUserData("SAPISID: ###; HSID: ###; LOGIN_INFO: ###; YSC: ###; APISID: ###; SID: ###; SSID: ###");
@@ -336,6 +337,15 @@ chatItem.unbanAuthor();
 You can pin a message at the top banner in live chat using ```ChatItem#pinAsBanner()```. This function needs user data. User must be either moderator or owner to perform this action.
 ```Java
 chatItem.pinAsBanner();
+```
+
+## Get live broadcast information (YouTubeLiveChat 1.5 or later)
+You can mainly use this to check whether the live has ended.
+
+This information contains some live information(e.g. title, description, start time, end time, view count)
+
+```Java
+live.getBroadcastInfo();
 ```
 
 ## Reset (YouTubeLiveChat 1.1 or later)

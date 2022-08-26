@@ -3,6 +3,7 @@
 
  # Requires
  - Java 8 or higher
+ - Gson
 
  # Features
  - Fetch live chat without YouTube API

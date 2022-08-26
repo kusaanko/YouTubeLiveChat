@@ -1,15 +1,13 @@
 package com.github.kusaanko.youtubelivechat;
 
+import com.google.gson.JsonElement;
+
 import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class Util {
@@ -361,17 +359,25 @@ public class Util {
             connection.setRequestProperty(key, header.get(key));
         }
         connection.connect();
-        InputStream inputStream = connection.getInputStream();
-        byte[] buff = new byte[8192];
-        int len;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        while ((len = inputStream.read(buff)) != -1) {
-            baos.write(buff, 0, len);
+        try {
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                InputStream inputStream = connection.getInputStream();
+                byte[] buff = new byte[8192];
+                int len;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((len = inputStream.read(buff)) != -1) {
+                    baos.write(buff, 0, len);
+                }
+                inputStream.close();
+                String content = baos.toString(StandardCharsets.UTF_8.toString());
+                baos.close();
+                return content;
+            }
+        } catch (IOException exception) {
+            throw new IOException("Error during http request ", exception);
         }
-        inputStream.close();
-        String content = baos.toString(StandardCharsets.UTF_8.toString());
-        baos.close();
-        return content;
+        return null;
     }
 
     public static String getPageContentWithJson(String url, String data, Map<String, String> header) throws IOException {
@@ -424,11 +430,11 @@ public class Util {
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
             String s;
             StringBuilder str = new StringBuilder();
-            while((s = reader.readLine()) != null) {
+            while ((s = reader.readLine()) != null) {
                 str.append(s);
             }
             connection.disconnect();
-            throw new IOException(str.toString(),e);
+            throw new IOException(str.toString(), e);
         }
     }
 
@@ -447,5 +453,50 @@ public class Util {
         }
 
         return sb.toString();
+    }
+
+    public static JsonElement searchJsonElementByKey(String key, JsonElement jsonElement) {
+
+        JsonElement value = null;
+
+        // If input is an array, iterate through each element
+        if (jsonElement.isJsonArray()) {
+            for (JsonElement jsonElement1 : jsonElement.getAsJsonArray()) {
+                value = searchJsonElementByKey(key, jsonElement1);
+                if (value != null) {
+                    return value;
+                }
+            }
+        } else {
+            // If input is object, iterate through the keys
+            if (jsonElement.isJsonObject()) {
+                Set<Map.Entry<String, JsonElement>> entrySet = jsonElement
+                        .getAsJsonObject().entrySet();
+                for (Map.Entry<String, JsonElement> entry : entrySet) {
+
+                    // If key corresponds to the
+                    String key1 = entry.getKey();
+                    if (key1.equals(key)) {
+                        value = entry.getValue();
+                        return value;
+                    }
+
+                    // Use the entry as input, recursively
+                    value = searchJsonElementByKey(key, entry.getValue());
+                    if (value != null) {
+                        return value;
+                    }
+                }
+            }
+
+            // If input is element, check whether it corresponds to the key
+            else {
+                if (jsonElement.toString().equals(key)) {
+                    value = jsonElement;
+                    return value;
+                }
+            }
+        }
+        return value;
     }
 }

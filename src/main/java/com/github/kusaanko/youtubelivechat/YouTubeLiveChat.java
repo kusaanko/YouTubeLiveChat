@@ -47,7 +47,7 @@ public class YouTubeLiveChat {
     private int commentCounter;
     private String clientMessageId;
     private String params;
-    private String SAPISID, HSID, SSID, APISID, SID, LOGIN_INFO; // LOGIN_INFO to select channel
+    private Map<String, String> cookie;
 
     private MessageDigest sha1;
     private final Gson gson;
@@ -246,7 +246,7 @@ public class YouTubeLiveChat {
                 throw new IOException("datasyncId is null! Please call reset() or set user data.");
             }
             if (this.params == null) {
-                throw new IllegalStateException("params is null! Please call reset().");
+                throw new IllegalStateException("params is null! You may not set appropriate Cookie. Please call reset().");
             }
             Util.sendHttpRequestWithJson(liveChatSendMessageApi + this.apiKey, this.getPayloadToSendMessage(message), this.getHeader());
         } catch (IOException exception) {
@@ -393,52 +393,13 @@ public class YouTubeLiveChat {
 
     /**
      * Set user data.
-     * The IDs are written in your browser's Cookie.
+     * Cookies can be found in Chrome Devtools(F12) 'Network' tab, 'get_live_chat' request.
+     * You need all cookies.
      *
-     * @param ids The Map that contains these keys: SAPISID, HSID, SSID, APISID, SID, and LOGIN_INFO
+     * @param cookie Cookie
      */
-    public void setUserData(Map<String, String> ids) {
-        if (!ids.containsKey("SAPISID") || !ids.containsKey("HSID") || !ids.containsKey("SSID") || !ids.containsKey("APISID") || !ids.containsKey("SID"))
-            throw new IllegalArgumentException("The map didn't contain any ids.");
-
-        this.setUserData(ids.get("SAPISID"), ids.get("HSID"), ids.get("SSID"), ids.get("APISID"), ids.get("SID"), ids.get("LOGIN_INFO"));
-    }
-
-    /**
-     * Set user data.
-     * The IDs are written in your browser's Cookie.
-     *
-     * @param SAPISID SAPISID
-     * @param HSID    HSID
-     * @param SSID    SSID
-     * @param APISID  APISID
-     * @param SID     SID
-     * @deprecated Add 'LOGIN_INFO' to select channel. {@link #setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID, String LOGIN_INFO)}
-     */
-    @Deprecated
-    public void setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID) {
-        this.setUserData(SAPISID, HSID, SSID, APISID, SID, null);
-    }
-
-    /**
-     * Set user data.
-     * The IDs are written in your browser's Cookie.
-     *
-     * @param SAPISID    SAPISID
-     * @param HSID       HSID
-     * @param SSID       SSID
-     * @param APISID     APISID
-     * @param SID        SID
-     * @param LOGIN_INFO LOGIN_INFO
-     */
-    public void setUserData(String SAPISID, String HSID, String SSID, String APISID, String SID, String LOGIN_INFO) {
-        this.SAPISID = SAPISID;
-        this.HSID = HSID;
-        this.SSID = SSID;
-        this.APISID = APISID;
-        this.SID = SID;
-        this.LOGIN_INFO = LOGIN_INFO;
-
+    public void setUserData(Map<String, String> cookie) {
+        this.cookie = cookie;
         try {
             this.reset();
         } catch (IOException e) {
@@ -449,23 +410,21 @@ public class YouTubeLiveChat {
     /**
      * Set user data.
      * Cookies can be found in Chrome Devtools(F12) 'Network' tab, 'get_live_chat' request.
-     * Any other cookies are ignored.
+     * You need all cookies.
      *
-     * @param cookies string that contains these cookies: SAPISID, HSID, SSID, APISID, SID, and LOGIN_INFO. format: "APISID:###; HSID:###; SSID: ..."
+     * @param cookie Cookie
      */
-    public void setUserData(String cookies) {
-        String all = String.format(";%s;", cookies);
-        String[] keys = new String[]{"SAPISID", "HSID", "SSID", "APISID", "SID", "LOGIN_INFO"};
-        String[] values = new String[6];
-
-        for (int i = 0; i < 6; i++) {
-            Pattern pattern = Pattern.compile("[^\\w]" + keys[i] + "=([^;]*);");
-            Matcher matcher = pattern.matcher(all);
-            if (matcher.find()) values[i] = matcher.group(1);
-            else throw new IllegalArgumentException("Cannot find cookie " + keys[i]);
+    public void setUserData(String cookie) {
+        String[] cookies = cookie.split(";");
+        this.cookie = new HashMap<>();
+        for (String c : cookies) {
+            this.cookie.put(c.substring(0, c.indexOf("=")).trim(), c.substring(c.indexOf("=") + 1).trim());
         }
-
-        setUserData(values[0], values[1], values[2], values[3], values[4], values[5]);
+        try {
+            this.reset();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void parseActions(List<Object> json) {
@@ -897,21 +856,28 @@ public class YouTubeLiveChat {
         if (this.isIDsMissing()) return header;
         String time = System.currentTimeMillis() / 1000 + "";
         String origin = "https://www.youtube.com";
-        String hash = time + " " + this.SAPISID + " " + origin;
+        // Find SAPISID
+        String SAPISID = this.cookie != null && this.cookie.containsKey("SAPISID") ? this.cookie.get("SAPISID") : "";
+        String hash = time + " " + SAPISID + " " + origin;
         byte[] sha1_result = this.getSHA1Engine().digest(hash.getBytes());
 
         header.put("Authorization", "SAPISIDHASH " + time + "_" + String.format("%040x", new BigInteger(1, sha1_result)));
         header.put("X-Origin", origin);
         header.put("Origin", origin);
-        header.put("Cookie", String.format("SAPISID=%s; HSID=%s; SSID=%s; APISID=%s; SID=%s;%s", this.SAPISID, this.HSID, this.SSID, this.APISID, this.SID,
-                this.LOGIN_INFO != null ? String.format(" LOGIN_INFO=%s;", this.LOGIN_INFO) : ""));
+        if (this.cookie != null) {
+            StringBuilder cookie = new StringBuilder();
+            for (Map.Entry<String, String> c : this.cookie.entrySet()) {
+                cookie.append(c.getKey()).append("=").append(c.getValue()).append(";");
+            }
+            header.put("Cookie", cookie.toString());
+        }
         return header;
     }
 
     public void getContextMenu(ChatItem chatItem) {
         try {
             String rawJson = Util.getPageContentWithJson(liveChatContextMenuApi + apiKey + "&params=" + chatItem.contextMenuParams, getPayloadToSendMessage(""), getHeader());
-            Map<String, Object> json = Util.toJSON(rawJson);
+            Map<String, Object> json = Util.toJSON(Objects.requireNonNull(rawJson));
             List<Object> items = Util.getJSONList(json, "items", "liveChatItemContextMenuSupportedRenderers", "menuRenderer");
             if (items != null) {
                 for (Object obj : items) {
@@ -1042,7 +1008,7 @@ public class YouTubeLiveChat {
     }
 
     private boolean isIDsMissing() {
-        return this.SAPISID == null || this.HSID == null || this.SSID == null || this.APISID == null || this.SID == null;
+        return this.cookie == null;
     }
 
     /**

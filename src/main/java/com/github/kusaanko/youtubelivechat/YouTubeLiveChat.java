@@ -398,13 +398,9 @@ public class YouTubeLiveChat {
      *
      * @param cookie Cookie
      */
-    public void setUserData(Map<String, String> cookie) {
+    public void setUserData(Map<String, String> cookie) throws IOException {
         this.cookie = cookie;
-        try {
-            this.reset();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.reset();
     }
 
     /**
@@ -414,17 +410,13 @@ public class YouTubeLiveChat {
      *
      * @param cookie Cookie
      */
-    public void setUserData(String cookie) {
+    public void setUserData(String cookie) throws IOException {
         String[] cookies = cookie.split(";");
         this.cookie = new HashMap<>();
         for (String c : cookies) {
             this.cookie.put(c.substring(0, c.indexOf("=")).trim(), c.substring(c.indexOf("=") + 1).trim());
         }
-        try {
-            this.reset();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.reset();
     }
 
     private void parseActions(List<Object> json) {

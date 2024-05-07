@@ -397,6 +397,8 @@ public class YouTubeLiveChat {
      * You need all cookies.
      *
      * @param cookie Cookie
+     *
+     * @throws IOException Http request error
      */
     public void setUserData(Map<String, String> cookie) throws IOException {
         this.cookie = cookie;
@@ -409,6 +411,8 @@ public class YouTubeLiveChat {
      * You need all cookies.
      *
      * @param cookie Cookie
+     *
+     * @throws IOException Http request error
      */
     public void setUserData(String cookie) throws IOException {
         String[] cookies = cookie.split(";");
@@ -1007,6 +1011,8 @@ public class YouTubeLiveChat {
      * Get broadcast info
      *
      * @return LiveBroadcastDetails obj
+     *
+     * @throws IOException Couldn't get broadcast info
      */
     public LiveBroadcastDetails getBroadcastInfo() throws IOException {
         try {

@@ -29,7 +29,7 @@
 <dependency>
   <groupId>com.github.kusaanko</groupId>
   <artifactId>YouTubeLiveChat</artifactId>
-  <version>1.5</version>
+  <version>1.6</version>
 </dependency>
 ```
 ## Gradle
@@ -43,7 +43,7 @@ repositories {
 
 dependencies {
     //https://github.com/kusaanko/YouTubeLiveChat
-    implementation 'com.github.kusaanko:YouTubeLiveChat:1.5'
+    implementation 'com.github.kusaanko:YouTubeLiveChat:1.6'
     //To use latest version
     //implementation 'com.github.kusaanko:YouTubeLiveChat:latest.release'
 }

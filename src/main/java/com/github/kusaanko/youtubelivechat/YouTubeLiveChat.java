@@ -1057,7 +1057,7 @@ public class YouTubeLiveChat {
             header.put("x-youtube-client-name", "1");
             header.put("x-youtube-client-version", getClientVersion());
             String response = Util.getPageContent(url, header);
-            JsonElement jsonElement = JsonParser.parseString(Objects.requireNonNull(response)).getAsJsonArray();
+            JsonElement jsonElement = JsonParser.parseString(Objects.requireNonNull(response)).getAsJsonObject();
             JsonElement liveBroadcastDetails = Util.searchJsonElementByKey("liveBroadcastDetails", jsonElement);
             return gson.fromJson(liveBroadcastDetails, LiveBroadcastDetails.class);
         } catch (IOException | NullPointerException exception) {

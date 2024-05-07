@@ -297,7 +297,7 @@ You can participate in live chat with your channel. It needs some user data: SAP
 You can set user data using ```YouTubeLiveChat#setUserData()``` for one of three ways:
 ```Java
 // The most default way. IDs can be found in browser's Cookie.
-YoutubeLiveChat.setUserData("SAPISID", "HSID", "SSID", "APISID", "SID", "LOGIN_INFO");
+YoutubeLiveChat.setUserData("Cookie");
 
 // You can use Map (YoutubeLiveChat 1.3.2 or later)
 YoutubeLiveChat.setUserData(Map<String, String>);
@@ -305,7 +305,7 @@ YoutubeLiveChat.setUserData(Map<String, String>);
 // You can also copy 'Cookies' header from browser request and paste here. (YoutubeLiveChat 1.4 or later)
 // Format: "KEY1: VALUE1; KEY: VALUE2; ..."
 // Ignore other cookies that aren't needed (in below example, YSC will be ignored)
-YoutubeLiveChat.setUserData("SAPISID: ###; HSID: ###; LOGIN_INFO: ###; YSC: ###; APISID: ###; SID: ###; SSID: ###");
+YoutubeLiveChat.setUserData("Key: Value");
 ```
 
 

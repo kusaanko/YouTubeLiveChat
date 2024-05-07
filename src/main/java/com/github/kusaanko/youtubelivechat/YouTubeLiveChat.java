@@ -989,7 +989,7 @@ public class YouTubeLiveChat {
             if (!id.contains("channel/") && (id.startsWith("http://") || id.startsWith("https://"))) {
                 try {
                     String html = Util.getPageContent(id, new HashMap<>());
-                    Matcher matcher = Pattern.compile("<meta itemprop=\"channelId\" content=\"([^\"]*)\"").matcher(html);
+                    Matcher matcher = Pattern.compile("<meta itemprop=\"identifier\" content=\"([^\"]*)\"").matcher(html);
                     if (matcher.find()) {
                         return matcher.group(1);
                     }

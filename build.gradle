@@ -31,14 +31,12 @@ publishing {
 
 task sourceJar(type : Jar) {
     from sourceSets.main.allJava
-    classifier('sources')
-    extension('jar')
+    archiveClassifier = 'sources'
 }
 
 task javadocJar(type : Jar, dependsOn : javadoc) {
     from javadoc.destinationDir
-    classifier('javadoc')
-    extension('jar')
+    archiveClassifier = 'javadoc'
 }
 
 artifacts {

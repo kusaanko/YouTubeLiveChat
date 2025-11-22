@@ -811,7 +811,7 @@ public class YouTubeLiveChat {
                     this.parseActions(actions);
                 }
             } else {
-                html = Util.getPageContent("https://www.youtube.com/live_chat?continuation=" + this.continuation + "",
+                html = Util.getPageContent("https://www.youtube.com/live_chat?v=" + this.videoId + "",
                         getHeader());
                 String initJson = Objects.requireNonNull(html).substring(
                         html.indexOf("window[\"ytInitialData\"] = ") + "window[\"ytInitialData\"] = ".length());

@@ -2,6 +2,7 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'application'
 }
 
 group 'com.github.kusaanko'
@@ -19,6 +20,10 @@ tasks.withType(AbstractCompile) each { it.options.encoding = 'UTF-8' }
 
 ext {
     mavenRepository = '..\\maven'
+}
+
+application {
+    mainClass = 'com.github.kusaanko.youtubelivechat.Main'
 }
 
 publishing {

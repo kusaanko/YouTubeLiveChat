@@ -21,13 +21,20 @@ public class YouTubeLiveChat {
      */
     public static String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36,gzip(gfe)";
 
-    private static final String liveChatApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key="; // view live chat
-    private static final String liveChatReplayApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat_replay?key="; // view chat replay
-    private static final String liveChatSendMessageApi = "https://www.youtube.com/youtubei/v1/live_chat/send_message?key="; // send chat
-    private static final String liveChatContextMenuApi = "https://www.youtube.com/youtubei/v1/live_chat/get_item_context_menu?key="; // get chat item menu
-    private static final String liveChatModerateApi = "https://studio.youtube.com/youtubei/v1/live_chat/moderate?key="; // moderation (delete, ban, unban)
-    private static final String liveChatActionApi = "https://studio.youtube.com/youtubei/v1/live_chat/live_chat_action?key="; // tools (pin)
-    private static final String liveStreamInfoApi = "https://www.youtube.com/watch?v="; // stream info
+    // view live chat
+    private static final String liveChatApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key=";
+    // view chat replay
+    private static final String liveChatReplayApi = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat_replay?key=";
+    // send chat
+    private static final String liveChatSendMessageApi = "https://www.youtube.com/youtubei/v1/live_chat/send_message?key=";
+    // get chat item menu
+    private static final String liveChatContextMenuApi = "https://www.youtube.com/youtubei/v1/live_chat/get_item_context_menu?key=";
+    // moderation (delete, ban, unban)
+    private static final String liveChatModerateApi = "https://studio.youtube.com/youtubei/v1/live_chat/moderate?key=";
+    // tools (pin)
+    private static final String liveChatActionApi = "https://studio.youtube.com/youtubei/v1/live_chat/live_chat_action?key=";
+    // stream info
+    private static final String liveStreamInfoApi = "https://www.youtube.com/watch?v=";
 
     private String videoId;
     private String channelId;
@@ -149,16 +156,18 @@ public class YouTubeLiveChat {
         this.chatItemTickerPaidMessages.clear();
         this.chatItemDeletes.clear();
         try {
-            //Get live actions
+            // Get live actions
             if (this.continuation == null) {
                 throw new IOException("continuation is null! Please call reset().");
             }
-            String pageContent = Util.getPageContentWithJson((this.isReplay ? liveChatReplayApi : liveChatApi) + this.apiKey, this.getPayload(offsetInMs), this.getHeader());
+            String pageContent = Util.getPageContentWithJson(
+                    (this.isReplay ? liveChatReplayApi : liveChatApi) + this.apiKey, this.getPayload(offsetInMs),
+                    this.getHeader());
             Map<String, Object> json = Util.toJSON(pageContent);
             if (this.visitorData == null || this.visitorData.isEmpty()) {
                 this.visitorData = Util.getJSONValueString(Util.getJSONMap(json, "responseContext"), "visitorData");
             }
-            //Get clientVersion
+            // Get clientVersion
             List<Object> serviceTrackingParams = Util.getJSONList(json, "serviceTrackingParams", "responseContext");
             if (serviceTrackingParams != null) {
                 for (Object ser : serviceTrackingParams) {
@@ -178,8 +187,9 @@ public class YouTubeLiveChat {
                     }
                 }
             }
-            //Parse actions and update continuation
-            Map<String, Object> liveChatContinuation = Util.getJSONMap(json, "continuationContents", "liveChatContinuation");
+            // Parse actions and update continuation
+            Map<String, Object> liveChatContinuation = Util.getJSONMap(json, "continuationContents",
+                    "liveChatContinuation");
             if (this.isReplay) {
                 if (liveChatContinuation != null) {
                     List<Object> actions = Util.getJSONList(liveChatContinuation, "actions");
@@ -188,11 +198,12 @@ public class YouTubeLiveChat {
                     }
                 }
                 List<Object> continuations = Util.getJSONList(liveChatContinuation, "continuations");
-                //Update continuation
+                // Update continuation
                 if (continuations != null) {
                     for (Object co : continuations) {
                         Map<String, Object> continuation = (Map<String, Object>) co;
-                        String value = Util.getJSONValueString(Util.getJSONMap(continuation, "liveChatReplayContinuationData"), "continuation");
+                        String value = Util.getJSONValueString(
+                                Util.getJSONMap(continuation, "liveChatReplayContinuationData"), "continuation");
                         if (value != null) {
                             this.continuation = value;
                         }
@@ -208,12 +219,15 @@ public class YouTubeLiveChat {
                     if (continuations != null) {
                         for (Object co : continuations) {
                             Map<String, Object> continuation = (Map<String, Object>) co;
-                            this.continuation = Util.getJSONValueString(Util.getJSONMap(continuation, "invalidationContinuationData"), "continuation");
+                            this.continuation = Util.getJSONValueString(
+                                    Util.getJSONMap(continuation, "invalidationContinuationData"), "continuation");
                             if (this.continuation == null) {
-                                this.continuation = Util.getJSONValueString(Util.getJSONMap(continuation, "timedContinuationData"), "continuation");
+                                this.continuation = Util.getJSONValueString(
+                                        Util.getJSONMap(continuation, "timedContinuationData"), "continuation");
                             }
                             if (this.continuation == null) {
-                                this.continuation = Util.getJSONValueString(Util.getJSONMap(continuation, "reloadContinuationData"), "continuation");
+                                this.continuation = Util.getJSONValueString(
+                                        Util.getJSONMap(continuation, "reloadContinuationData"), "continuation");
                             }
                         }
                     }
@@ -223,7 +237,6 @@ public class YouTubeLiveChat {
             throw new IOException("Can't get youtube live chat!", exception);
         }
     }
-
 
     /**
      * Send a message to this live chat
@@ -246,9 +259,11 @@ public class YouTubeLiveChat {
                 throw new IOException("datasyncId is null! Please call reset() or set user data.");
             }
             if (this.params == null) {
-                throw new IllegalStateException("params is null! You may not set appropriate Cookie. Please call reset().");
+                throw new IllegalStateException(
+                        "params is null! You may not set appropriate Cookie. Please call reset().");
             }
-            Util.sendHttpRequestWithJson(liveChatSendMessageApi + this.apiKey, this.getPayloadToSendMessage(message), this.getHeader());
+            Util.sendHttpRequestWithJson(liveChatSendMessageApi + this.apiKey, this.getPayloadToSendMessage(message),
+                    this.getHeader());
         } catch (IOException exception) {
             throw new IOException("Couldn't send a message!", exception);
         }
@@ -269,10 +284,12 @@ public class YouTubeLiveChat {
                 }
                 getContextMenu(chatItem);
                 if (chatItem.chatDeleteParams == null) {
-                    throw new IllegalStateException("chatDeleteParams is null! Check if you have permission or use setUserData() first.");
+                    throw new IllegalStateException(
+                            "chatDeleteParams is null! Check if you have permission or use setUserData() first.");
                 }
             }
-            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.chatDeleteParams), this.getHeader());
+            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey,
+                    this.getPayloadClient(chatItem.chatDeleteParams), this.getHeader());
         } catch (IOException exception) {
             throw new IOException("Couldn't delete chat!", exception);
         }
@@ -293,10 +310,12 @@ public class YouTubeLiveChat {
                 }
                 getContextMenu(chatItem);
                 if (chatItem.timeBanParams == null) {
-                    throw new IllegalStateException("timeBanParams is null! Check if you have permission or use setUserData() first.");
+                    throw new IllegalStateException(
+                            "timeBanParams is null! Check if you have permission or use setUserData() first.");
                 }
             }
-            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.timeBanParams), this.getHeader());
+            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey,
+                    this.getPayloadClient(chatItem.timeBanParams), this.getHeader());
         } catch (IOException exception) {
             throw new IOException("Couldn't ban user!", exception);
         }
@@ -317,10 +336,12 @@ public class YouTubeLiveChat {
             if (chatItem.userBanParams == null) {
                 getContextMenu(chatItem);
                 if (chatItem.userBanParams == null) {
-                    throw new IllegalStateException("userBanParams is null! Check if you have permission or use setUserData() first.");
+                    throw new IllegalStateException(
+                            "userBanParams is null! Check if you have permission or use setUserData() first.");
                 }
             }
-            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.userBanParams), this.getHeader());
+            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey,
+                    this.getPayloadClient(chatItem.userBanParams), this.getHeader());
         } catch (IOException exception) {
             throw new IOException("Couldn't ban user!", exception);
         }
@@ -341,10 +362,12 @@ public class YouTubeLiveChat {
             if (chatItem.userUnbanParams == null) {
                 getContextMenu(chatItem);
                 if (chatItem.userUnbanParams == null) {
-                    throw new IllegalStateException("userUnbanParams is null! Check if you have permission or use setUserData() first.");
+                    throw new IllegalStateException(
+                            "userUnbanParams is null! Check if you have permission or use setUserData() first.");
                 }
             }
-            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey, this.getPayloadClient(chatItem.userUnbanParams), this.getHeader());
+            Util.sendHttpRequestWithJson(liveChatModerateApi + this.apiKey,
+                    this.getPayloadClient(chatItem.userUnbanParams), this.getHeader());
         } catch (IOException exception) {
             throw new IOException("Couldn't unban user!", exception);
         }
@@ -365,10 +388,12 @@ public class YouTubeLiveChat {
                 }
                 getContextMenu(chatItem);
                 if (chatItem.pinToTopParams == null) {
-                    throw new IllegalStateException("pinToTopParams is null! Check if you have permission or use setUserData() first.");
+                    throw new IllegalStateException(
+                            "pinToTopParams is null! Check if you have permission or use setUserData() first.");
                 }
             }
-            Util.sendHttpRequestWithJson(liveChatActionApi + this.apiKey, this.getPayloadClient(chatItem.pinToTopParams), this.getHeader());
+            Util.sendHttpRequestWithJson(liveChatActionApi + this.apiKey,
+                    this.getPayloadClient(chatItem.pinToTopParams), this.getHeader());
         } catch (IOException exception) {
             throw new IOException("Couldn't pin chat!", exception);
         }
@@ -393,7 +418,8 @@ public class YouTubeLiveChat {
 
     /**
      * Set user data.
-     * Cookies can be found in Chrome Devtools(F12) 'Network' tab, 'get_live_chat' request.
+     * Cookies can be found in Chrome Devtools(F12) 'Network' tab, 'get_live_chat'
+     * request.
      * You need all cookies.
      *
      * @param cookie Cookie
@@ -407,7 +433,8 @@ public class YouTubeLiveChat {
 
     /**
      * Set user data.
-     * Cookies can be found in Chrome Devtools(F12) 'Network' tab, 'get_live_chat' request.
+     * Cookies can be found in Chrome Devtools(F12) 'Network' tab, 'get_live_chat'
+     * request.
      * You need all cookies.
      *
      * @param cookie Cookie
@@ -427,7 +454,7 @@ public class YouTubeLiveChat {
         for (Object i : json) {
             Map<String, Object> actions = (Map<String, Object>) i;
             Map<String, Object> addChatItemAction = Util.getJSONMap(actions, "addChatItemAction");
-            //For replay
+            // For replay
             if (addChatItemAction == null) {
                 Map<String, Object> replayChatItemAction = Util.getJSONMap(actions, "replayChatItemAction");
                 if (replayChatItemAction != null) {
@@ -448,8 +475,9 @@ public class YouTubeLiveChat {
                     this.chatItems.add(chatItem);
                 }
             }
-            //Pinned message
-            Map<String, Object> contents = Util.getJSONMap(actions, "addBannerToLiveChatCommand", "bannerRenderer", "liveChatBannerRenderer", "contents");
+            // Pinned message
+            Map<String, Object> contents = Util.getJSONMap(actions, "addBannerToLiveChatCommand", "bannerRenderer",
+                    "liveChatBannerRenderer", "contents");
             if (contents != null) {
                 ChatItem chatItem = new ChatItem(this);
                 this.parseChatItem(chatItem, contents);
@@ -458,7 +486,8 @@ public class YouTubeLiveChat {
             Map<String, Object> markChatItemAsDeletedAction = Util.getJSONMap(actions, "markChatItemAsDeletedAction");
             if (markChatItemAsDeletedAction != null) {
                 ChatItemDelete chatItemDelete = new ChatItemDelete();
-                chatItemDelete.message = this.parseMessage(Util.getJSONMap(markChatItemAsDeletedAction, "deletedStateMessage"), new ArrayList<>());
+                chatItemDelete.message = this.parseMessage(
+                        Util.getJSONMap(markChatItemAsDeletedAction, "deletedStateMessage"), new ArrayList<>());
                 chatItemDelete.targetId = Util.getJSONValueString(markChatItemAsDeletedAction, "targetItemId");
                 this.chatItemDeletes.add(chatItemDelete);
             }
@@ -480,13 +509,15 @@ public class YouTubeLiveChat {
             liveChatTextMessageRenderer = liveChatMembershipItemRenderer;
         }
         if (liveChatTextMessageRenderer != null) {
-            chatItem.authorName = Util.getJSONValueString(Util.getJSONMap(liveChatTextMessageRenderer, "authorName"), "simpleText");
+            chatItem.authorName = Util.getJSONValueString(Util.getJSONMap(liveChatTextMessageRenderer, "authorName"),
+                    "simpleText");
             chatItem.id = Util.getJSONValueString(liveChatTextMessageRenderer, "id");
             chatItem.authorChannelID = Util.getJSONValueString(liveChatTextMessageRenderer, "authorExternalChannelId");
             Map<String, Object> message = Util.getJSONMap(liveChatTextMessageRenderer, "message");
             chatItem.messageExtended = new ArrayList<>();
             chatItem.message = parseMessage(message, chatItem.messageExtended);
-            List<Object> authorPhotoThumbnails = Util.getJSONList(liveChatTextMessageRenderer, "thumbnails", "authorPhoto");
+            List<Object> authorPhotoThumbnails = Util.getJSONList(liveChatTextMessageRenderer, "thumbnails",
+                    "authorPhoto");
             if (authorPhotoThumbnails != null) {
                 chatItem.authorIconURL = this.getJSONThumbnailURL(authorPhotoThumbnails);
             }
@@ -498,9 +529,11 @@ public class YouTubeLiveChat {
             if (authorBadges != null) {
                 for (Object au : authorBadges) {
                     Map<String, Object> authorBadge = (Map<String, Object>) au;
-                    Map<String, Object> liveChatAuthorBadgeRenderer = Util.getJSONMap(authorBadge, "liveChatAuthorBadgeRenderer");
+                    Map<String, Object> liveChatAuthorBadgeRenderer = Util.getJSONMap(authorBadge,
+                            "liveChatAuthorBadgeRenderer");
                     if (liveChatAuthorBadgeRenderer != null) {
-                        String type = Util.getJSONValueString(Util.getJSONMap(liveChatAuthorBadgeRenderer, "icon"), "iconType");
+                        String type = Util.getJSONValueString(Util.getJSONMap(liveChatAuthorBadgeRenderer, "icon"),
+                                "iconType");
                         if (type != null) {
                             switch (type) {
                                 case "VERIFIED":
@@ -514,7 +547,8 @@ public class YouTubeLiveChat {
                                     break;
                             }
                         }
-                        Map<String, Object> customThumbnail = Util.getJSONMap(liveChatAuthorBadgeRenderer, "customThumbnail");
+                        Map<String, Object> customThumbnail = Util.getJSONMap(liveChatAuthorBadgeRenderer,
+                                "customThumbnail");
                         if (customThumbnail != null) {
                             chatItem.authorType.add(AuthorType.MEMBER);
                             List<Object> thumbnails = (List<Object>) customThumbnail.get("thumbnails");
@@ -524,19 +558,22 @@ public class YouTubeLiveChat {
                 }
             }
             // Context Menu Params
-            String contextMenuParams = Util.getJSONValueString(Util.getJSONMap(liveChatTextMessageRenderer, "contextMenuEndpoint", "liveChatItemContextMenuEndpoint"), "params");
+            String contextMenuParams = Util.getJSONValueString(Util.getJSONMap(liveChatTextMessageRenderer,
+                    "contextMenuEndpoint", "liveChatItemContextMenuEndpoint"), "params");
             if (contextMenuParams != null) {
                 chatItem.contextMenuParams = contextMenuParams;
             }
         }
         if (action.containsKey("liveChatViewerEngagementMessageRenderer")) {
-            Map<String, Object> liveChatViewerEngagementMessageRenderer = (Map<String, Object>) action.get("liveChatViewerEngagementMessageRenderer");
+            Map<String, Object> liveChatViewerEngagementMessageRenderer = (Map<String, Object>) action
+                    .get("liveChatViewerEngagementMessageRenderer");
             chatItem.authorName = "YouTube";
             chatItem.authorChannelID = "user/YouTube";
             chatItem.authorType.add(AuthorType.YOUTUBE);
             chatItem.id = Util.getJSONValueString(liveChatViewerEngagementMessageRenderer, "id");
             chatItem.messageExtended = new ArrayList<>();
-            chatItem.message = this.parseMessage(Util.getJSONMap(liveChatViewerEngagementMessageRenderer, "message"), chatItem.messageExtended);
+            chatItem.message = this.parseMessage(Util.getJSONMap(liveChatViewerEngagementMessageRenderer, "message"),
+                    chatItem.messageExtended);
             String timestampStr = Util.getJSONValueString(liveChatViewerEngagementMessageRenderer, "timestampUsec");
             if (timestampStr != null) {
                 chatItem.timestamp = Long.parseLong(timestampStr);
@@ -548,21 +585,25 @@ public class YouTubeLiveChat {
             chatItem.headerBackgroundColor = Util.getJSONValueInt(liveChatPaidMessageRenderer, "bodyBackgroundColor");
             chatItem.headerTextColor = Util.getJSONValueInt(liveChatPaidMessageRenderer, "bodyBackgroundColor");
             chatItem.authorNameTextColor = Util.getJSONValueInt(liveChatPaidMessageRenderer, "authorNameTextColor");
-            chatItem.purchaseAmount = Util.getJSONValueString(Util.getJSONMap(liveChatPaidMessageRenderer, "purchaseAmountText"), "simpleText");
+            chatItem.purchaseAmount = Util.getJSONValueString(
+                    Util.getJSONMap(liveChatPaidMessageRenderer, "purchaseAmountText"), "simpleText");
             chatItem.type = ChatItemType.PAID_MESSAGE;
         }
         if (liveChatPaidStickerRenderer != null) {
             chatItem.backgroundColor = Util.getJSONValueInt(liveChatPaidStickerRenderer, "backgroundColor");
-            chatItem.purchaseAmount = Util.getJSONValueString(Util.getJSONMap(liveChatPaidStickerRenderer, "purchaseAmountText"), "simpleText");
+            chatItem.purchaseAmount = Util.getJSONValueString(
+                    Util.getJSONMap(liveChatPaidStickerRenderer, "purchaseAmountText"), "simpleText");
             List<Object> thumbnails = Util.getJSONList(liveChatPaidStickerRenderer, "thumbnails", "sticker");
             if (thumbnails != null) {
                 chatItem.stickerIconURL = this.getJSONThumbnailURL(thumbnails);
             }
             chatItem.type = ChatItemType.PAID_STICKER;
         }
-        Map<String, Object> liveChatTickerPaidMessageItemRenderer = Util.getJSONMap(action, "liveChatTickerPaidMessageItemRenderer");
+        Map<String, Object> liveChatTickerPaidMessageItemRenderer = Util.getJSONMap(action,
+                "liveChatTickerPaidMessageItemRenderer");
         if (liveChatTickerPaidMessageItemRenderer != null) {
-            Map<String, Object> renderer = Util.getJSONMap(liveChatPaidMessageRenderer, "showItemEndpoint", "showLiveChatItemEndpoint", "renderer");
+            Map<String, Object> renderer = Util.getJSONMap(liveChatPaidMessageRenderer, "showItemEndpoint",
+                    "showLiveChatItemEndpoint", "renderer");
             this.parseChatItem(chatItem, renderer);
             chatItem.endBackgroundColor = Util.getJSONValueInt(liveChatPaidMessageRenderer, "endBackgroundColor");
             chatItem.durationSec = Util.getJSONValueInt(liveChatPaidMessageRenderer, "durationSec");
@@ -571,7 +612,8 @@ public class YouTubeLiveChat {
         }
         if (liveChatMembershipItemRenderer != null) {
             chatItem.messageExtended = new ArrayList<>();
-            chatItem.message = this.parseMessage(Util.getJSONMap(liveChatMembershipItemRenderer, "headerSubtext"), chatItem.messageExtended);
+            chatItem.message = this.parseMessage(Util.getJSONMap(liveChatMembershipItemRenderer, "headerSubtext"),
+                    chatItem.messageExtended);
             chatItem.type = ChatItemType.NEW_MEMBER_MESSAGE;
         }
     }
@@ -616,7 +658,8 @@ public class YouTubeLiveChat {
                         }
                     }
                     emoji.shortcuts = shortcuts;
-                    if (!shortcuts.isEmpty()) text.append(" ").append(shortcuts.get(0)).append(" ");
+                    if (!shortcuts.isEmpty())
+                        text.append(" ").append(shortcuts.get(0)).append(" ");
                     List<Object> searchTermsList = Util.getJSONList(emojiMap, "searchTerms");
                     ArrayList<String> searchTerms = new ArrayList<>();
                     if (searchTermsList != null) {
@@ -707,14 +750,16 @@ public class YouTubeLiveChat {
             if (type == IdType.VIDEO) {
                 this.videoId = id;
                 html = Util.getPageContent("https://www.youtube.com/watch?v=" + id, getHeader());
-                Matcher channelIdMatcher = Pattern.compile("\"channelId\":\"([^\"]*)\",\"isOwnerViewing\"").matcher(Objects.requireNonNull(html));
+                Matcher channelIdMatcher = Pattern.compile("\"channelId\":\"([^\"]*)\",\"isOwnerViewing\"")
+                        .matcher(Objects.requireNonNull(html));
                 if (channelIdMatcher.find()) {
                     this.channelId = channelIdMatcher.group(1);
                 }
             } else if (type == IdType.CHANNEL) {
                 this.channelId = id;
                 html = Util.getPageContent("https://www.youtube.com/channel/" + id + "/live", getHeader());
-                Matcher videoIdMatcher = Pattern.compile("\"updatedMetadataEndpoint\":\\{\"videoId\":\"([^\"]*)").matcher(Objects.requireNonNull(html));
+                Matcher videoIdMatcher = Pattern.compile("\"updatedMetadataEndpoint\":\\{\"videoId\":\"([^\"]*)")
+                        .matcher(Objects.requireNonNull(html));
                 if (videoIdMatcher.find()) {
                     this.videoId = videoIdMatcher.group(1);
                 } else {
@@ -725,12 +770,16 @@ public class YouTubeLiveChat {
             if (isReplayMatcher.find()) {
                 this.isReplay = Boolean.parseBoolean(isReplayMatcher.group(1));
             }
-            Matcher topOnlyContinuationMatcher = Pattern.compile("\"selected\":true,\"continuation\":\\{\"reloadContinuationData\":\\{\"continuation\":\"([^\"]*)").matcher(html);
+            Matcher topOnlyContinuationMatcher = Pattern.compile(
+                    "\"selected\":true,\"continuation\":\\{\"reloadContinuationData\":\\{\"continuation\":\"([^\"]*)")
+                    .matcher(html);
             if (topOnlyContinuationMatcher.find()) {
                 this.continuation = topOnlyContinuationMatcher.group(1);
             }
             if (!this.isTopChatOnly) {
-                Matcher allContinuationMatcher = Pattern.compile("\"selected\":false,\"continuation\":\\{\"reloadContinuationData\":\\{\"continuation\":\"([^\"]*)").matcher(html);
+                Matcher allContinuationMatcher = Pattern.compile(
+                        "\"selected\":false,\"continuation\":\\{\"reloadContinuationData\":\\{\"continuation\":\"([^\"]*)")
+                        .matcher(html);
                 if (allContinuationMatcher.find()) {
                     this.continuation = allContinuationMatcher.group(1);
                 }
@@ -744,24 +793,33 @@ public class YouTubeLiveChat {
                 this.datasyncId = datasyncIdMatcher.group(1);
             }
             if (this.isReplay) {
-                html = Util.getPageContent("https://www.youtube.com/live_chat_replay?continuation=" + this.continuation + "", new HashMap<>());
-                String initJson = Objects.requireNonNull(html).substring(html.indexOf("window[\"ytInitialData\"] = ") + "window[\"ytInitialData\"] = ".length());
+                html = Util.getPageContent(
+                        "https://www.youtube.com/live_chat_replay?continuation=" + this.continuation + "",
+                        new HashMap<>());
+                String initJson = Objects.requireNonNull(html).substring(
+                        html.indexOf("window[\"ytInitialData\"] = ") + "window[\"ytInitialData\"] = ".length());
                 initJson = initJson.substring(0, initJson.indexOf(";</script>"));
                 Map<String, Object> json = Util.toJSON(initJson);
-                Map<String, Object> timedContinuationData = Util.getJSONMap(json, "continuationContents", "liveChatContinuation", "continuations", 0, "liveChatReplayContinuationData");
+                Map<String, Object> timedContinuationData = Util.getJSONMap(json, "continuationContents",
+                        "liveChatContinuation", "continuations", 0, "liveChatReplayContinuationData");
                 if (timedContinuationData != null) {
                     this.continuation = timedContinuationData.get("continuation").toString();
                 }
-                List<Object> actions = Util.getJSONList(json, "actions", "continuationContents", "liveChatContinuation");
+                List<Object> actions = Util.getJSONList(json, "actions", "continuationContents",
+                        "liveChatContinuation");
                 if (actions != null) {
                     this.parseActions(actions);
                 }
             } else {
-                html = Util.getPageContent("https://www.youtube.com/live_chat?continuation=" + this.continuation + "", getHeader());
-                String initJson = Objects.requireNonNull(html).substring(html.indexOf("window[\"ytInitialData\"] = ") + "window[\"ytInitialData\"] = ".length());
+                html = Util.getPageContent("https://www.youtube.com/live_chat?continuation=" + this.continuation + "",
+                        getHeader());
+                String initJson = Objects.requireNonNull(html).substring(
+                        html.indexOf("window[\"ytInitialData\"] = ") + "window[\"ytInitialData\"] = ".length());
                 initJson = initJson.substring(0, initJson.indexOf(";</script>"));
                 Map<String, Object> json = Util.toJSON(initJson);
-                Map<String, Object> sendLiveChatMessageEndpoint = Util.getJSONMap(json, "continuationContents", "liveChatContinuation", "actionPanel", "liveChatMessageInputRenderer", "sendButton", "buttonRenderer", "serviceEndpoint", "sendLiveChatMessageEndpoint");
+                Map<String, Object> sendLiveChatMessageEndpoint = Util.getJSONMap(json, "continuationContents",
+                        "liveChatContinuation", "actionPanel", "liveChatMessageInputRenderer", "sendButton",
+                        "buttonRenderer", "serviceEndpoint", "sendLiveChatMessageEndpoint");
                 if (sendLiveChatMessageEndpoint != null) {
                     this.params = sendLiveChatMessageEndpoint.get("params").toString();
                 }
@@ -849,7 +907,8 @@ public class YouTubeLiveChat {
 
     private Map<String, String> getHeader() {
         HashMap<String, String> header = new HashMap<>();
-        if (this.isIDsMissing()) return header;
+        if (this.isIDsMissing())
+            return header;
         String time = System.currentTimeMillis() / 1000 + "";
         String origin = "https://www.youtube.com";
         // Find SAPISID
@@ -857,7 +916,8 @@ public class YouTubeLiveChat {
         String hash = time + " " + SAPISID + " " + origin;
         byte[] sha1_result = this.getSHA1Engine().digest(hash.getBytes());
 
-        header.put("Authorization", "SAPISIDHASH " + time + "_" + String.format("%040x", new BigInteger(1, sha1_result)));
+        header.put("Authorization",
+                "SAPISIDHASH " + time + "_" + String.format("%040x", new BigInteger(1, sha1_result)));
         header.put("X-Origin", origin);
         header.put("Origin", origin);
         if (this.cookie != null) {
@@ -872,35 +932,49 @@ public class YouTubeLiveChat {
 
     public void getContextMenu(ChatItem chatItem) {
         try {
-            String rawJson = Util.getPageContentWithJson(liveChatContextMenuApi + apiKey + "&params=" + chatItem.contextMenuParams, getPayloadToSendMessage(""), getHeader());
+            String rawJson = Util.getPageContentWithJson(
+                    liveChatContextMenuApi + apiKey + "&params=" + chatItem.contextMenuParams,
+                    getPayloadToSendMessage(""), getHeader());
             Map<String, Object> json = Util.toJSON(Objects.requireNonNull(rawJson));
-            List<Object> items = Util.getJSONList(json, "items", "liveChatItemContextMenuSupportedRenderers", "menuRenderer");
+            List<Object> items = Util.getJSONList(json, "items", "liveChatItemContextMenuSupportedRenderers",
+                    "menuRenderer");
             if (items != null) {
                 for (Object obj : items) {
                     Map<String, Object> item = (Map<String, Object>) obj;
                     Map<String, Object> menuServiceItemRenderer = Util.getJSONMap(item, "menuServiceItemRenderer");
                     if (menuServiceItemRenderer != null) {
-                        String iconType = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "icon"), "iconType");
+                        String iconType = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "icon"),
+                                "iconType");
                         if (iconType != null) {
                             switch (iconType) {
                                 case "KEEP": // pin
-                                    chatItem.pinToTopParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "liveChatActionEndpoint"), "params");
+                                    chatItem.pinToTopParams = Util
+                                            .getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,
+                                                    "serviceEndpoint", "liveChatActionEndpoint"), "params");
                                     break;
                                 case "DELETE": // delete
-                                    chatItem.chatDeleteParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
+                                    chatItem.chatDeleteParams = Util
+                                            .getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,
+                                                    "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
                                     break;
                                 case "HOURGLASS": // timeout
-                                    chatItem.timeBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
+                                    chatItem.timeBanParams = Util
+                                            .getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,
+                                                    "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
                                     break;
                                 case "REMOVE_CIRCLE": // ban
-                                    chatItem.userBanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
+                                    chatItem.userBanParams = Util
+                                            .getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,
+                                                    "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
                                     break;
                                 case "ADD_CIRCLE": // unban
-                                    chatItem.userUnbanParams = Util.getJSONValueString(Util.getJSONMap(menuServiceItemRenderer, "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
+                                    chatItem.userUnbanParams = Util
+                                            .getJSONValueString(Util.getJSONMap(menuServiceItemRenderer,
+                                                    "serviceEndpoint", "moderateLiveChatEndpoint"), "params");
                                     break;
                                 case "FLAG": // Report
-                                case "ADD_MODERATOR": //Set author as moderator
-                                case "REMOVE_MODERATOR": //Set author as normal
+                                case "ADD_MODERATOR": // Set author as moderator
+                                case "REMOVE_MODERATOR": // Set author as normal
                                 default:
                                     break;
                             }
@@ -933,7 +1007,8 @@ public class YouTubeLiveChat {
      */
     public static String getVideoIdFromURL(String url) {
         String id = url;
-        if (!id.contains("?") && !id.contains(".com/") && !id.contains(".be/") && !id.contains("/") && !id.contains("&")) {
+        if (!id.contains("?") && !id.contains(".com/") && !id.contains(".be/") && !id.contains("/")
+                && !id.contains("&")) {
             return id;
         }
         if (id.contains("youtube.com/watch?")) {
@@ -972,20 +1047,23 @@ public class YouTubeLiveChat {
     /**
      * Get channel id from url
      *
-     * @param url Full url(example https://www.youtube.com/channel/USWmbkAWEKOG43WAnbw)
+     * @param url Full url(example
+     *            https://www.youtube.com/channel/USWmbkAWEKOG43WAnbw)
      * @return Channel id
      * @throws IllegalArgumentException URL format is incorrect
      */
     public static String getChannelIdFromURL(String url) {
         String id = url;
-        if (!id.contains("?") && !id.contains(".com/") && !id.contains(".be/") && !id.contains("/") && !id.contains("&")) {
+        if (!id.contains("?") && !id.contains(".com/") && !id.contains(".be/") && !id.contains("/")
+                && !id.contains("&")) {
             return id;
         }
         if (id.contains("youtube.com/")) {
             if (!id.contains("channel/") && (id.startsWith("http://") || id.startsWith("https://"))) {
                 try {
                     String html = Util.getPageContent(id, new HashMap<>());
-                    Matcher matcher = Pattern.compile("<meta itemprop=\"identifier\" content=\"([^\"]*)\"").matcher(html);
+                    Matcher matcher = Pattern.compile("<meta itemprop=\"identifier\" content=\"([^\"]*)\"")
+                            .matcher(html);
                     if (matcher.find()) {
                         return matcher.group(1);
                     }

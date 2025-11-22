@@ -1,7 +1,7 @@
 
 plugins {
     id 'java'
-    id 'maven'
+    id 'maven-publish'
 }
 
 group 'com.github.kusaanko'
@@ -21,10 +21,10 @@ ext {
     mavenRepository = '..\\maven'
 }
 
-uploadArchives {
+publishing {
     repositories {
-        mavenDeployer {
-            repository(url: uri(mavenRepository))
+        maven {
+            url = uri(mavenRepository)
         }
     }
 }

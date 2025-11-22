@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'com.github.kusaanko'
-version '1.6'
+version '2.0'
 
 repositories {
     mavenCentral()
@@ -19,7 +19,7 @@ javadoc {
 tasks.withType(AbstractCompile) each { it.options.encoding = 'UTF-8' }
 
 ext {
-    mavenRepository = '..\\maven'
+    mavenRepository = '../maven'
 }
 
 application {
@@ -27,6 +27,15 @@ application {
 }
 
 publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.github.kusaanko'
+            artifactId = 'YouTubeLiveChat'
+            version = '2.0'
+
+            from components.java
+        }
+    }
     repositories {
         maven {
             url = uri(mavenRepository)
@@ -47,6 +56,11 @@ task javadocJar(type : Jar, dependsOn : javadoc) {
 artifacts {
     archives sourceJar
     archives javadocJar
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 dependencies {

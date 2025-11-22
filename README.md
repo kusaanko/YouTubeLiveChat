@@ -8,7 +8,7 @@ Java API that fetches YouTube live chat.
 
 If you want to use this project actively or distribute an app using this project, I highly recommend fork this project and maintain yourself.
 
-I think that I'm going ti developing this project. I'm not using this project, and I am busy, so the priority of developing this project is the lowest.
+I think that I'm going to developing this project. I'm not using this project, and I am busy, so the priority of developing this project is the lowest.
 
 # Requires
 

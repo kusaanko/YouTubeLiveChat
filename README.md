@@ -42,7 +42,7 @@ I think that I'm going ti developing this project. I'm not using this project, a
 <dependency>
   <groupId>com.github.kusaanko</groupId>
   <artifactId>YouTubeLiveChat</artifactId>
-  <version>1.6</version>
+  <version>2.0</version>
 </dependency>
 ```
 
@@ -58,7 +58,7 @@ repositories {
 
 dependencies {
     //https://github.com/kusaanko/YouTubeLiveChat
-    implementation 'com.github.kusaanko:YouTubeLiveChat:1.6'
+    implementation 'com.github.kusaanko:YouTubeLiveChat:2.0'
     //To use latest version
     //implementation 'com.github.kusaanko:YouTubeLiveChat:latest.release'
 }

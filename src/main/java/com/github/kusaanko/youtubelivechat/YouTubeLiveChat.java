@@ -162,7 +162,7 @@ public class YouTubeLiveChat {
                 throw new IOException("continuation is null! Please call reset().");
             }
             String pageContent = Util.getPageContentWithJson(
-                    (this.isReplay ? liveChatReplayApi : liveChatApi), this.getPayload(offsetInMs),
+                    (this.isReplay ? liveChatApi : liveChatApi), this.getPayload(offsetInMs),
                     this.getHeader());
             Map<String, Object> json = Util.toJSON(pageContent);
             if (this.visitorData == null || this.visitorData.isEmpty()) {
@@ -808,9 +808,13 @@ public class YouTubeLiveChat {
                         "https://www.youtube.com/live_chat_replay?continuation=" + this.continuation + "",
                         new HashMap<>());
                 String initJson = Objects.requireNonNull(html).substring(
-                        html.indexOf("window[\"ytInitialData\"] = ") + "window[\"ytInitialData\"] = ".length());
-                initJson = initJson.substring(0, initJson.indexOf(";</script>"));
+                        html.indexOf("ytcfg.set({\"DEVICE\"") + "ytcfg.set(".length());
+                initJson = initJson.substring(0, initJson.indexOf("); window.ytcfg"));
                 Map<String, Object> json = Util.toJSON(initJson);
+                String visitorData = Util.getJSONValueString(json, "VISITOR_DATA");
+                if (visitorData != null) {
+                    this.visitorData = visitorData;
+                }
                 Map<String, Object> timedContinuationData = Util.getJSONMap(json, "continuationContents",
                         "liveChatContinuation", "continuations", 0, "liveChatReplayContinuationData");
                 if (timedContinuationData != null) {
@@ -821,6 +825,7 @@ public class YouTubeLiveChat {
                 if (actions != null) {
                     this.parseActions(actions);
                 }
+                throw new IOException("Replay is not supported yet.");
             } else {
                 html = Util.getPageContent("https://www.youtube.com/live_chat?v=" + this.videoId + "",
                         getHeader());

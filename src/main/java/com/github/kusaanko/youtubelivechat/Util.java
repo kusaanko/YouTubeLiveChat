@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
 import java.io.*;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -159,7 +158,8 @@ public class Util {
         return null;
     }
 
-    public static String getPageContentWithJson(String url, String data, Map<String, String> header) throws IOException {
+    public static String getPageContentWithJson(String url, String data, Map<String, String> header)
+            throws IOException {
         URL u = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) u.openConnection();
         putRequestHeader(header);

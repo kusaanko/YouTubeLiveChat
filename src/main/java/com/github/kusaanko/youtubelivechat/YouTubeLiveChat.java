@@ -38,6 +38,7 @@ public class YouTubeLiveChat {
 
     private String videoId;
     private String channelId;
+    private String userId;
     private String continuation;
     private boolean isReplay;
     private final boolean isTopChatOnly;
@@ -764,6 +765,16 @@ public class YouTubeLiveChat {
                     this.videoId = videoIdMatcher.group(1);
                 } else {
                     throw new IOException("The channel (ID:" + this.channelId + ") has not started live streaming!");
+                }
+            } else if (type == IdType.USER) {
+                this.userId = id;
+                html = Util.getPageContent("https://www.youtube.com/@" + this.userId + "/live", getHeader());
+                Matcher videoIdMatcher = Pattern.compile("\"updatedMetadataEndpoint\":\\{\"videoId\":\"([^\"]*)")
+                        .matcher(Objects.requireNonNull(html));
+                if (videoIdMatcher.find()) {
+                    this.videoId = videoIdMatcher.group(1);
+                } else {
+                    throw new IOException("The user (ID:" + this.userId + ") has not started live streaming!");
                 }
             }
             Matcher isReplayMatcher = Pattern.compile("\"isReplay\":([^,]*)").matcher(html);

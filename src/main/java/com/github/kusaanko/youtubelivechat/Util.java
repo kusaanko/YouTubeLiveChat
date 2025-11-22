@@ -188,11 +188,12 @@ public class Util {
                 String content = baos.toString(StandardCharsets.UTF_8.toString());
                 baos.close();
                 return content;
+            } else {
+                throw new IOException("HTTP error code: " + responseCode);
             }
         } catch (IOException exception) {
             throw new IOException("Error during http request ", exception);
         }
-        return null;
     }
 
     public static void sendHttpRequestWithJson(String url, String data, Map<String, String> header) throws IOException {

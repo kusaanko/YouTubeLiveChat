@@ -161,7 +161,7 @@ public class YouTubeLiveChat {
                 throw new IOException("continuation is null! Please call reset().");
             }
             String pageContent = Util.getPageContentWithJson(
-                    (this.isReplay ? liveChatReplayApi : liveChatApi) + this.apiKey, this.getPayload(offsetInMs),
+                    (this.isReplay ? liveChatReplayApi : liveChatApi), this.getPayload(offsetInMs),
                     this.getHeader());
             Map<String, Object> json = Util.toJSON(pageContent);
             if (this.visitorData == null || this.visitorData.isEmpty()) {
@@ -820,6 +820,19 @@ public class YouTubeLiveChat {
                 Map<String, Object> sendLiveChatMessageEndpoint = Util.getJSONMap(json, "continuationContents",
                         "liveChatContinuation", "actionPanel", "liveChatMessageInputRenderer", "sendButton",
                         "buttonRenderer", "serviceEndpoint", "sendLiveChatMessageEndpoint");
+                List<Object> liveChatRenderer = Util.getJSONList(json, "continuations", "contents", "liveChatRenderer");
+                for (Object object : liveChatRenderer) {
+                    if (object instanceof Map) {
+                        Map<String, Object> renderer = (Map<String, Object>) object;
+                        String continuation = Util.getJSONValueString(
+                                Util.getJSONMap(renderer, "invalidationContinuationData"),
+                                "continuation");
+                        if (continuation != null) {
+                            this.continuation = continuation;
+                        }
+                        break;
+                    }
+                }
                 if (sendLiveChatMessageEndpoint != null) {
                     this.params = sendLiveChatMessageEndpoint.get("params").toString();
                 }
@@ -833,7 +846,7 @@ public class YouTubeLiveChat {
             return this.clientVersion;
         }
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-        return "2." + format.format(new Date(System.currentTimeMillis() - (24 * 60 * 1000))) + ".06.00";
+        return "2." + format.format(new Date(System.currentTimeMillis() - (24 * 60 * 1000)));
     }
 
     private String getPayload(long offsetInMs) {
@@ -845,7 +858,8 @@ public class YouTubeLiveChat {
         Map<String, Object> client = new LinkedHashMap<>();
         json.put("context", context);
         context.put("client", client);
-        client.put("visitorData", this.visitorData);
+        if (visitorData != null)
+            client.put("visitorData", this.visitorData);
         client.put("userAgent", userAgent);
         client.put("clientName", "WEB");
         client.put("clientVersion", this.getClientVersion());
